@@ -4,9 +4,8 @@ from tkinter import filedialog
 from services.principal_doc import procesarcoor
 
 
-def main ():
+def main():
 
-    
     """
     Esta funcion ejecuta el inicio del proceso
 
@@ -20,36 +19,36 @@ def main ():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 1  
+    modulo = 1
 
-    libro = import_file_path   
-    
+    libro = import_file_path
 
-    book = op.load_workbook(libro)  
+    book = op.load_workbook(libro)
 
     p = book.sheetnames
-    print (p)   
+    print(p)
 
-    if modulo ==1:
-        pags = p[4:13]  
+    if modulo == 1:
+        pags = p[4:13]
 
-    if modulo ==2:
-        pags = p[4:8] #modulo 2
+    if modulo == 2:
+        pags = p[4:8]  # modulo 2
     print(pags)
     """
     Antes de correr el ciclo, asegurarse de que pags tenga todas las hojas
     en las que se van a escribir validaciones con este método.
-    """ 
+    """
 
     for pa in pags:
-        
-        pagina = pa
-        
-        shi = book[pagina]
-        shet = pd.read_excel(libro,sheet_name=pagina,engine='openpyxl')
-        procesarcoor(shet, shi)
-        
-    book.save('{}_ver1.xlsx'.format(modulo) )
 
-if __name__ == '__main__':
-        main()            
+        pagina = pa
+
+        shi = book[pagina]
+        shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
+        procesarcoor(shet, shi)
+
+    book.save("{}_ver1.xlsx".format(modulo))
+
+
+if __name__ == "__main__":
+    main()
