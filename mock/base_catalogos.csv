@@ -1,0 +1,12 @@
+﻿palabras,numeros,nombre_catalogo,Censo
+tipo de centro penitenciario,"1,2,3,4,5,6,7,8,9,10,11,12,99",Catálogo de tipo de centro penitenciario federal,CNSIPEF_2022
+clasificación o división del centro penitenciario,"1,2,3,4,5,6,7,9",Catálogo de clasificación o división del centro penitenciario federal,CNSIPEF_2022
+modelo arquitectónico penitenciario,"1,2,3,4,5,9",Catálogo de modelo arquitectónico penitenciario,CNSIPEF_2022
+frecuencia en la que se otorgó el suministro,"1,2,3,4,5,6,9",Catálogo de frecuencia en la que se otorgó el suministro,CNSIPEF_2022
+sexo,"1,2,8,9",Catálogo de sexo,CNSIPEF_2022
+nivel de escolaridad,"1,2,3,4,5,6,7,8,9",Catálogo de nivel de escolaridad,CNSIPEF_2022
+estatus,"1,2,3,4,8,9",Catálogo de estatus de nivel de escolaridad,CNSIPEF_2022
+institución de procedencia,"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,99",Catálogo de institución de procedencia,CNSIPEF_2022
+pertenencia a pueblo indígena ,"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,99",Catálogo de pueblo indígena,CNSIPEF_2022
+forma de designación,"1,2,3,4,9",Catálogo de forma de designación,CNSIPEF_2022
+frecuencia con la que se otorgó al personal de custodia,"1,2,3,4,5,6,7,8,9,99",Catálogo de frecuencia en la que se otorgaron los elementos de uniforme policial,CNSIPEF_2022
