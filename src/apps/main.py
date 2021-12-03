@@ -1,6 +1,8 @@
 import pandas as pd
 import openpyxl as op
 from tkinter import filedialog
+import sys
+sys.path.append('D:\OneDrive - INEGI\Documents\codigos_python\git2\src')
 from services.principal_doc import procesarcoor
 
 

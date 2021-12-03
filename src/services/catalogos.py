@@ -10,11 +10,25 @@ import string
 
 
 catalogos = pd.read_csv(
-    r"D:\OneDrive - INEGI\Documents\proyecto_validaciones\base_catalogos.csv"
+    r"D:\OneDrive - INEGI\Documents\codigos_python\git2\validaciones\base_catalogos.csv"
 )
 
 
 def validar_catalogo(pregunta, dic, hoja):
+    """
+    
+
+    Parameters
+    ----------
+    pregunta : int. Es el numero de fila en dataframe de pandas 
+    dic : dict. Diccionario con las coordenadas y frases para clasificar
+    hoja : hoja de openpyxl
+
+    Returns
+    -------
+    None.
+
+    """
     abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
     d = dic["catalogos"]
     ind = 0
@@ -31,7 +45,7 @@ def validar_catalogo(pregunta, dic, hoja):
                 letra = abc1[cor[1]]
                 filavalidar = pregunta + cor[0] + 3
                 celda = letra + str(filavalidar)
-                tl = '"{}"'.format(lista)
+                tl = '"="",{}"'.format(lista)
                 valid(hoja, [celda], tl)
             fila += 1
         ind += 1
