@@ -476,6 +476,7 @@ class CommonUtils:
         delitotupla = 0
         notabla = []
         totales = CommonUtils.paratotales(npregunta, hopan, preguntas)
+        busqueda_condicional = {}
         if m1 > 18:
             if len(delito) > 0 and len(x) > 180:
                 tabla = 2  # tabla de delitos
@@ -502,12 +503,11 @@ class CommonUtils:
             tabla_partes = partes_tuplas
         if tabla > 0 and totales == "No":
             tabla = 3  # tabla normal sin totales que validar
-        try:
+        if tabla > 0:
             busqueda_condicional = CommonUtils.varias_busquedas(
                 npregunta, hopan, x, y, tabla_partes, preguntas
             )  # es tuplas de lista sin validar aritmeticamente
-        except:
-            busqueda_condicional = {}
+        
 
         ultimo_escrito = x[-1]
         ultimis = (
@@ -585,9 +585,17 @@ class CommonUtils:
         noa = CommonUtils.buscarpalabra(npregunta, "No aplica", hopan, preguntas)
         cuatro_numeros = CommonUtils.busqueda_4(npregunta, hopan, preguntas)
         tuplas = CommonUtils.tuplasnoval(x, y, part_tab)
+        final = CommonUtils.buscar_final_tabla(x,tuplas)
+        di['final'] = final
         di["tuplas"] = tuplas
         # print('ese es el di de tuplas: ',di)
         cata = CommonUtils.buscarpalabra(npregunta, "(ver catálogo)", hopan, preguntas)
+        temporal = [
+            '(aaaa)', '(mm)', '(dd)',
+            'Edad\n(años)', '(años)'
+            ]
+        colum_temporales = CommonUtils.buscar_varias_cosas(
+            npregunta, hopan, preguntas, temporal)
 
         if len(noa) > 0:
             nli = [tupla for tupla in noa if tupla[1] > 3]
@@ -597,19 +605,31 @@ class CommonUtils:
                     for tu in sinon:
                         if tupla[1] != tu[1]:
                             ind.append(tupla)
-                ind1 = CommonUtils.comsabe(ind, tuplas)
-                di["NA"] = ind1
+                if ind:
+                    final = CommonUtils.buscar_final_tabla(x,ind)
+                    di['final'] = final
+                    ind1 = CommonUtils.comsabe(ind, tuplas)
+                    di["NA"] = ind1
             else:
-                nli1 = CommonUtils.comsabe(nli, tuplas)
-                di["NA"] = nli1
+                if nli:
+                    final = CommonUtils.buscar_final_tabla(x,nli)
+                    di['final'] = final
+                    nli1 = CommonUtils.comsabe(nli, tuplas)
+                    di["NA"] = nli1
 
         if len(sinonosabe) > 0:
+            final = CommonUtils.buscar_final_tabla(x,sinonosabe)
+            di['final'] = final
             sabe = CommonUtils.comsabe(
                 sinonosabe, tuplas
             )  # arreglar fila de la tupla por celdas combinadas
             di["sabe"] = sabe
 
         if len(cuatro_numeros) > 0:
+            final = CommonUtils.buscar_final_tabla(
+                x,cuatro_numeros
+                )
+            di['final'] = final
             sabe1 = CommonUtils.comsabe(
                 cuatro_numeros, tuplas
             )  # arreglar fila de la tupla por celdas combinadas
@@ -624,10 +644,67 @@ class CommonUtils:
             di["catalogos"] = catalogos
 
         if len(sinon) > 0:
+            final = CommonUtils.buscar_final_tabla(x,sinon)
+            di['final'] = final
             sinon1 = CommonUtils.comsabe(sinon, tuplas)
             di["noaplica"] = sinon1
+        
+        if colum_temporales:
+        
+            if '(años)' in colum_temporales:
+                final = CommonUtils.buscar_final_tabla(
+                    x,colum_temporales['(años)']
+                    )
+                di['final'] = final
+
+            if '(aaaa)' in colum_temporales:
+                final = CommonUtils.buscar_final_tabla(
+                    x,colum_temporales['(aaaa)']
+                    )
+                di['final'] = final
+            
+            nd = {}
+            for key in colum_temporales:
+                
+                lista = CommonUtils.comsabe(
+                    colum_temporales[key],tuplas
+                    )
+                nd[key] = lista
+            if 'Edad\n(años)' in nd and '(años)' in nd:
+                for tupla in nd['(años)']:
+                    if tupla in nd['Edad\n(años)']:
+                        nd['(años)'].remove(tupla)
+        
+            di['temporales'] = nd
 
         return di
+
+    @staticmethod
+    def buscar_final_tabla(x,tuplas):
+        """
+        
+
+        Parameters
+        ----------
+        x : list. Lista de filas
+        tuplas : list. Lista de tuplas de la pregunta
+
+        Returns
+        -------
+        None.
+
+        """
+        fin = CommonUtils.distancia(x,1)
+        inicio = tuplas[0][0]
+        p = []
+        for i in fin:
+            fila = x[i]
+            if fila>inicio:
+                r = fila-inicio
+                p.append(r)
+        if not p:
+            p = [0]
+        return p[0]
 
     @staticmethod
     def busqueda_4(npregunta, hopan, preguntas):
@@ -662,6 +739,37 @@ class CommonUtils:
         return a
 
     @staticmethod
+    def buscar_varias_cosas(npregunta,hopan,preguntas,busquedas):
+        """
+        
+
+        Parameters
+        ----------
+        npregunta : TYPE
+            DESCRIPTION.
+        hopan : TYPE
+            DESCRIPTION.
+        preguntas : TYPE
+            DESCRIPTION.
+        busquedas : list. Lista de strings con las cosas a buscar
+
+        Returns
+        -------
+        a : (list). Regresa una lista con tuplas coordenadas de donde 
+        encontró la frase
+
+        """
+        
+        r = {}
+        for busqueda in busquedas:
+            a = CommonUtils.buscarpalabra(
+                npregunta, busqueda, hopan,preguntas
+                )
+            if len(a) > 0:
+                r[busqueda] = a
+        return r
+
+    @staticmethod
     def comsabe(tuplasa, tuplasb):
         """
 
@@ -679,8 +787,22 @@ class CommonUtils:
 
         """
 
-        res = [(tuplasb[0][0], tupla[1]) for tupla in tuplasa]
-        return res
+        comprobar = [tupla[0] for tupla in tuplasa]
+        unic = list(set(comprobar))
+        diferencias = CommonUtils.distancia(unic, 4)
+        
+        resta = unic[0] - tuplasb[0][0]
+        if resta>5:
+            return tuplasa
+        else:
+            if diferencias:
+                tabla1 = [tupla for tupla in tuplasa if tupla[0] in unic[:diferencias[0]+1]] 
+                tabla2omas = [tupla for tupla in tuplasa if tupla[0] not in unic[:diferencias[0]+1]]
+                res = [(tuplasb[0][0],tupla[1]) for tupla in tabla1]
+                res += tabla2omas
+            else:
+                res = [(tuplasb[0][0],tupla[1]) for tupla in tuplasa]
+            return res
 
     @staticmethod
     def tuplasnoval(x, y, part_tab):
@@ -713,7 +835,7 @@ class CommonUtils:
             c += 1
         li = []
         for tupla in tuplas:
-            if tupla[1] > 15 and tupla[0] < 25:
+            if tupla[1] > 15 and tupla[0] < 25 and tupla[1] < 31:
                 li.append(tupla)
         li1 = []
         for tupla in li:
@@ -721,10 +843,10 @@ class CommonUtils:
             li1.append(a)
         li2 = list(set(li1))
         defi = []
-        for val in li2:
-            for tu in tuplas:
-                if val == tu[0]:
-                    defi.append(tu)
+        li2 = CommonUtils.reducir(li2)
+        for tu in tuplas:
+            if li2[0]==tu[0]:
+                defi.append(tu)
         # print('unicos posibles y tuplas: ',unicos, posibles, tuplas,x,y)
         # unificar filas por celdas combinadas
         if part_tab != 0:
@@ -733,6 +855,23 @@ class CommonUtils:
         else:
             ndefi = CommonUtils.comprobaciontuplas(defi)
         return ndefi
+
+    @staticmethod
+    def reducir(lista):
+        """reduce lista"""
+        if len(lista)>1:
+            
+            dist = CommonUtils.distancia(lista,1)
+            if len(dist) > 0:
+                limite = dist[0]+1
+                rlista = lista[:limite]
+                nlista = [max(rlista)]
+            else:
+                nlista = [max(lista)]
+            
+        else:
+            nlista = lista
+        return nlista
 
     @staticmethod
     def comprobaciontuplas(tuplas):
@@ -1074,7 +1213,19 @@ class CommonUtils:
 
     @staticmethod
     def distancia(lista, nfilas):
-        "medir distancia entre filas, nfilas es el numero de filas a medir, regresa lista con indice de fila en su respectiva lista"
+        """
+        
+
+        Parameters
+        ----------
+        lista : list. Lista con numeros
+        nfilas : int. La distancia o diferencia a medir
+
+        Returns
+        -------
+        li : list. Regresa una lista con los indices de la lista de entrada en donde se cumple la diferencia señalada 
+
+        """
         li = []
         con = 0
         for i in lista:
@@ -1091,7 +1242,21 @@ class CommonUtils:
 
     @staticmethod
     def getcor(npregunta, hopan, preguntas):
-        "devuelve fila de inicio, final y una lista de tuplas con coordenadas para obtener las columnas con los valores que se repiten de la lista llamada inicio"
+        """
+        
+
+        Parameters
+        ----------
+        npregunta : int. El numero de la pregunta en la que se va a hacer el analisis dentro del dataframe de pandas
+        hopan : Dataframe de pandas.
+        preguntas : Lista de preguntas
+
+        Returns
+        -------
+        res : dict. Devuelve un diccionario con fila de inicio, fila de fin y coordenadas de columnas de la pregunta
+
+        """
+        
         dic = CommonUtils.imagen(npregunta, hopan, preguntas)
         x = dic["fila"]
         y = dic["columna"]
@@ -1159,8 +1324,101 @@ class CommonUtils:
         return res
 
     @staticmethod
+    def validar_temporal(pregunta, hoja, di):
+        diccionario = di['temporales']
+        abc = list(string.ascii_uppercase)+['AA','AB','AC','AD']
+        
+        
+        if '(aaaa)' in diccionario:
+            cor = diccionario['(aaaa)']
+            for tupla in cor:
+                letra = abc[tupla[1]]
+                fila = str(tupla[0]+pregunta+3)
+                final = str(di['final']+tupla[0] + 2+pregunta)
+                celda = letra+fila
+                celdaf = letra+final
+                dv = DataValidation(type="whole", operator="between",
+                                    formula1=2000, formula2=2050,
+                                    allow_blank=True)
+                dv.add(f'{celda}:{celdaf}')
+                hoja.add_data_validation(dv)
+        
+        if '(mm)' in diccionario:
+            cor = diccionario['(mm)']
+            for tupla in cor:
+                letra = abc[tupla[1]]
+                fila = str(tupla[0]+pregunta+3)
+                final = str(di['final']+tupla[0] + 2+pregunta)
+                celdaf = letra+final
+                celda = letra+fila
+                dv = DataValidation(type="whole", operator="between",
+                                    formula1=1, formula2=12,
+                                    allow_blank=True)
+                dv.add(f'{celda}:{celdaf}')
+                hoja.add_data_validation(dv)
+        
+        if '(dd)' in diccionario:
+            cor = diccionario['(dd)']
+            for tupla in cor:
+                letra = abc[tupla[1]]
+                fila = str(tupla[0]+pregunta+3)
+                final = str(di['final']+tupla[0] + 2+pregunta)
+                celdaf = letra+final
+                celda = letra+fila
+                dv = DataValidation(type="whole", operator="between",
+                                    formula1=1, formula2=31,
+                                    allow_blank=True)
+                dv.add(f'{celda}:{celdaf}')
+                hoja.add_data_validation(dv)
+        
+        if '(años)' in diccionario:
+            cor = diccionario['(años)']
+            for tupla in cor:
+                letra = abc[tupla[1]]
+                fila = str(tupla[0]+pregunta+3)
+                final = str(di['final']+tupla[0] + 2+pregunta)
+                celdaf = letra+final
+                celda = letra+fila
+                dv = DataValidation(type="whole", operator="between",
+                                    formula1=1, formula2=99,
+                                    allow_blank=True)
+                dv.add(f'{celda}:{celdaf}')
+                hoja.add_data_validation(dv)
+                
+        if 'Edad\n(años)' in diccionario:
+            cor = diccionario['Edad\n(años)']
+            for tupla in cor:
+                letra = abc[tupla[1]]
+                fila = str(tupla[0]+pregunta+3)
+                final = str(di['final']+tupla[0] + 1+pregunta)
+                celdaf = letra+final
+                celda = letra+fila
+                dv = DataValidation(type="whole", operator="between",
+                                    formula1=18, formula2=99,
+                                    allow_blank=True)
+                dv.add(f'{celda}:{celdaf}')
+                hoja.add_data_validation(dv)
+        
+        return
+
+    @staticmethod
     def poner_gris(listalistas, hoja):
-        "recibe una lista de listas de tuplas para poner condicional gris del NA"
+        """
+        
+
+        Parameters
+        ----------
+        listalistas : list. Recibe lista de listas con tuplas
+        hoja : hoja de excel en openpyxl
+
+        Returns
+        -------
+        None.
+        
+        recibe una lista de listas de tuplas para poner condicional gris del NA
+
+        """
+        
         validar = []
         validar.append(listalistas[-1][0])
         for i in listalistas:
@@ -1176,13 +1434,30 @@ class CommonUtils:
 
     @staticmethod
     def soloautosuma(diccionario, part_tab, freal, fila, hoja, autosuma):
-        "esta función es para poner autosuma"
+        """
+        
+
+        Parameters
+        ----------
+        diccionario : dict. Diccionario con coordenadas (lista de tuplas)
+        part_tab : list Lista de lista de tuplas
+        freal : int. Numero de fila en dataframe de pandas
+        fila : int. Numero de fila en pregunta de dataframe de pandas
+        hoja : hoja de excel de openpyxl
+        autosuma : fila donde hay que poner la autosuma (es a la fila de la pregunta del dataframe)
+
+        Returns
+        -------
+        None.
+
+        """
+        c_dic = [] + diccionario['tuplas']
         if autosuma != 0:
             abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
             if part_tab == 0:
-                tuplas = diccionario["tuplas"]
+                tuplas = c_dic
             if part_tab != 0:
-                tuplas = diccionario["tuplas"]
+                tuplas = c_dic
                 for i in part_tab:
                     for tu in i:
                         a = tu[0] - 1  # se hace ajuste por desfaz en las coordenadas
@@ -1211,8 +1486,10 @@ class CommonUtils:
                 letcol.append(a)
             # cords = crearcoordenada1(letcol, tuplas, fila, freal)
             print("Tablas 3. Autosuma normal: ", letcol, freal, autos + 1)
-            CommonUtils.autosumanormal(letcol, freal, autos, hoja)
-
+            c = 0 
+            for tupla in tuplas:
+                CommonUtils.autosumaportupla([letcol[c]], freal, autos, hoja,tupla,fila)
+                c += 1
         return
 
     @staticmethod
@@ -1234,11 +1511,12 @@ class CommonUtils:
         None.
 
         """
+        c_tuplas = [] + diccionario['tuplas']
         abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
         if part_tab == 0:
-            tuplas = diccionario["tuplas"]
+            tuplas = c_tuplas
         if part_tab != 0:
-            tuplas = diccionario["tuplas"]
+            tuplas = c_tuplas
             for i in part_tab:
                 for tu in i:
                     a = tu[0] - 1  # se hace ajuste por desfaz en las coordenadas
@@ -1377,7 +1655,6 @@ class CommonUtils:
     def validar_sabe(hoja, celdas):
         "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
         dv = DataValidation(type="list", formula1='"="",1,2,9"', allow_blank=True)
-
         hoja.add_data_validation(dv)
 
         for celda in celdas:
@@ -1651,7 +1928,7 @@ class CommonUtils:
                 letcol.append(co)
             preg.append(letcol)
         con = 0
-        print("preguntaaaa", preg)
+        
         for p in preg:
             if len(preg) == 0:
                 break
@@ -1759,8 +2036,65 @@ class CommonUtils:
         return
 
     @staticmethod
-    def subtuplas(totales, tuplas, part_tab):
-        "regresa lista de tuplas para hacer totales y subtotales. De no haber eso, regresa tal cual las tuplas que ingresan. Auxiliar es por si hay varias filas, seleccionar una"
+    def borrar_tuplas(diccionario, tuplas):
+        """
+        
+
+        Parameters
+        ----------
+        diccionario : dict. diccionario arrojado en r[8] de analizarcor
+        tuplas : list. Lista de tuplas de columnas
+
+        Returns
+        -------
+        tuplas : list. nueva lista de tuplas de columnas sin 
+        las tuplas del sabenosabe etc
+
+        """
+        
+        if len(diccionario) > 1:
+            tuplas_borrar = []
+            if 'sabe' in diccionario:
+                tuplas_borrar += diccionario['sabe']
+            if 'sabe1' in diccionario:
+                tuplas_borrar += diccionario['sabe1']
+            # if 'noaplica' in diccionario:       esas dos suelen ir antes de los totales a validar
+            #     tuplas_borrar += diccionario['noaplica']
+            # if 'NA' in diccionario:
+            #     tuplas_borrar += diccionario['NA']
+            for borrar in tuplas_borrar:
+                for objetivo in tuplas:
+                    a = range(objetivo[0]-2,objetivo[0]+2)
+                    if borrar[0] in a:
+                        if borrar[1] == objetivo[1]:
+                            tuplas.remove(objetivo)
+        else:
+            tuplas = tuplas
+        return tuplas
+
+
+    @staticmethod
+    def subtuplas(totales, tuplas, part_tab, dic):
+        """
+        
+
+        Parameters
+        ----------
+        totales : dict. Diccionario con listas de tuplas donde se encontró 
+        total o subtotal en la tabla
+        tuplas : list. List de tuplas para comparar con totales y 
+        subtotales (agregar, quitar, o clasificar elementos)
+        part_tab : list. Lista de listas de tuplas para tablas que van en partes
+        dic : dict. Diccionario con todas tuplas y coordenadas de frases 
+        para catálogo, o donde van listas desplegables
+        Returns
+        -------
+        Regresa siempre una lista de listas con las tuplas por cada total o 
+        subtotal dentro de la tabla, con la finalidad de poder iterarlas
+        y hacer la validación para todos los elementos.
+
+        """
+        
         print("entrada subtuplas: ", totales, tuplas, part_tab)
         total = totales["total"]
         sub = totales["subtotal"]
@@ -1771,7 +2105,8 @@ class CommonUtils:
             at = [tupla[1] for tupla in tuplas]
             if total[0][1] not in at:
                 tuplas = [(tuplas[0][0], total[0][1])] + tuplas
-
+        tuplas = CommonUtils.borrar_tuplas(dic, tuplas)
+        
         if (
             len(sub) == 0 and len(total) == 1 and part_tab != 0
         ):  # para tablas con un solo total y part_tab
@@ -1830,7 +2165,7 @@ class CommonUtils:
                 for lista in tot_residual:  # REcursividad!!!! Cuidado!!!
                     nd = {"total": [total[c]], "subtotal": sub_residual[c]}
 
-                    aderir = subtuplas(nd, lista, 0)
+                    aderir = CommonUtils.subtuplas(nd, lista, 0,dic)
                     for i in aderir:
                         coltu.append(i)
                     c += 1
@@ -3577,11 +3912,11 @@ class CommonUtils:
             if fila_inicio != fila_suma:
                 que = ["=IF(SUM(" + a + ":" + b + ")>0," + r[c] + ",0)"]
                 donde = [val + str(fila_suma + 1)]
-                escribirgeneral(donde, que, hoja)
+                CommonUtils.escribirgeneral(donde, que, hoja)
             else:
                 que = ["=IF(" + a + ">0," + r[c] + ",0)"]
                 donde = [val + str(fila_suma + 1)]
-                escribirgeneral(donde, que, hoja)
+                CommonUtils.escribirgeneral(donde, que, hoja)
             c += 1
         que1 = [
             "=SUM(AF" + str(fila_suma + 1) + ":" + "AH" + str(fila_suma + 1) + ")",
