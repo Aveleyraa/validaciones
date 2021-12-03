@@ -835,7 +835,7 @@ class CommonUtils:
             c += 1
         li = []
         for tupla in tuplas:
-            if tupla[1] > 15 and tupla[0] < 25:
+            if tupla[1] > 15 and tupla[0] < 25 and tupla[1] < 31:
                 li.append(tupla)
         li1 = []
         for tupla in li:
@@ -862,7 +862,7 @@ class CommonUtils:
         if len(lista)>1:
             
             dist = CommonUtils.distancia(lista,1)
-            if len(dist)>0:
+            if len(dist) > 0:
                 limite = dist[0]+1
                 rlista = lista[:limite]
                 nlista = [max(rlista)]
@@ -1511,7 +1511,7 @@ class CommonUtils:
         None.
 
         """
-        c_tuplas = []+diccionario['tuplas']
+        c_tuplas = [] + diccionario['tuplas']
         abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
         if part_tab == 0:
             tuplas = c_tuplas
@@ -1655,7 +1655,6 @@ class CommonUtils:
     def validar_sabe(hoja, celdas):
         "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
         dv = DataValidation(type="list", formula1='"="",1,2,9"', allow_blank=True)
-
         hoja.add_data_validation(dv)
 
         for celda in celdas:
@@ -2166,7 +2165,7 @@ class CommonUtils:
                 for lista in tot_residual:  # REcursividad!!!! Cuidado!!!
                     nd = {"total": [total[c]], "subtotal": sub_residual[c]}
 
-                    aderir = subtuplas(nd, lista, 0)
+                    aderir = CommonUtils.subtuplas(nd, lista, 0,dic)
                     for i in aderir:
                         coltu.append(i)
                     c += 1
@@ -3913,11 +3912,11 @@ class CommonUtils:
             if fila_inicio != fila_suma:
                 que = ["=IF(SUM(" + a + ":" + b + ")>0," + r[c] + ",0)"]
                 donde = [val + str(fila_suma + 1)]
-                escribirgeneral(donde, que, hoja)
+                CommonUtils.escribirgeneral(donde, que, hoja)
             else:
                 que = ["=IF(" + a + ">0," + r[c] + ",0)"]
                 donde = [val + str(fila_suma + 1)]
-                escribirgeneral(donde, que, hoja)
+                CommonUtils.escribirgeneral(donde, que, hoja)
             c += 1
         que1 = [
             "=SUM(AF" + str(fila_suma + 1) + ":" + "AH" + str(fila_suma + 1) + ")",

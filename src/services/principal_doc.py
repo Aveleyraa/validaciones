@@ -10,7 +10,13 @@ from utility.common_utils import CommonUtils
 
 
 def procesarcoor(hopan, hoja):  # funcion principal!!
-    "hopan es hoja de pandas y hoja es de openpy"
+    """
+    hopan: dataframe de pandas
+    hoja: hoja de excel de openpyxl
+    
+    
+    """
+    
 
     pro = CommonUtils.preguntas(hopan)
     t = CommonUtils.espacio(hopan, pro)
@@ -29,6 +35,26 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
         letras_validadas = []
         # alfa = clasificador(r,totales)
         # print('el alfa: ', alfa)
+        if "sabe" in r[8] or "sabe1" in r[8] or "noaplica" in r[8] or "NA" in r[8]:
+            diccio = r[8]
+            tuplas = diccio["tuplas"]
+            ad = CommonUtils.masdeunatablauni(tuplas)
+            for i in ad:
+                try:
+                    freal = pregunta + i + 1
+                    CommonUtils.validarcondicional(diccio, part, freal, i, hoja)
+                except:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
+                    freal = pregunta + i + 1 + 1
+                    for tuplas in part:
+                        npart = [[(tupla[0]-1,tupla[1]) for tupla in tuplas]]
+                    #este ajuste es exclusivo para pregunta 8.1 de modulo 1
+                    CommonUtils.validarcondicional(diccio, npart, freal, i, hoja)
+                # funcion para validar
+        if 'temporales' in r[8]:
+            # diccionario = r[8]['temporales']
+            CommonUtils.validar_temporal(pregunta, hoja, r[8])
+        
+
         if r[0] == 1 and r[1] == 0:  # si es tabla general
             a = CommonUtils.getcor(con, hopan, pro)
             inicios = a["inicio"]
@@ -44,8 +70,8 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
                     tfil = tupl[0]
                     if tfil == i:
                         ntuplas.append(tupl)
-                tuplas = CommonUtils.subtuplas(totales, ntuplas, part_tab)
-                print("salida subtuplas: ", tuplas, len(tuplas), len(ntuplas))
+                tuplas = CommonUtils.subtuplas(totales, ntuplas, part_tab,r[8])
+                # print("salida subtuplas: ", tuplas, len(tuplas), len(ntuplas))
                 if fin == []:  # para ajustar perguntas de tabla que no tiene autosuma
                     fin = [0 - pregunta for i in range(0, len(inicios))]
                 if len(tuplas) == len(ntuplas):
@@ -128,7 +154,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
                     pregunta + i + 1
                 )  # mas uno porque es la fila del titulo de columnas
                 r[1].sort()
-                tuplas = CommonUtils.subtuplas(totales, r[1], part_tab)
+                tuplas = CommonUtils.subtuplas(totales, r[1], part_tab,r[8])
                 ntuplas = []
                 for tupl in r[1]:
                     tfil = tupl[0]
@@ -178,7 +204,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             for i in ad:
                 tp = p["tuplas"]
                 tp.sort()
-                tuplas = CommonUtils.subtuplas(totales, tp, part_tab)
+                tuplas = CommonUtils.subtuplas(totales, tp, part_tab,r[8])
                 codelitos = u[k]
                 de = delito[k]
                 freal = i + 1 + pregunta
@@ -273,18 +299,6 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             freal = pregunta + 2
             CommonUtils.variablesnotab(corde, freal, hoja, r[9])
 
-        if "sabe" in r[8] or "sabe1" in r[8] or "noaplica" in r[8] or "NA" in r[8]:
-            diccio = r[8]
-            tuplas = diccio["tuplas"]
-            ad = CommonUtils.masdeunatablauni(tuplas)
-            for i in ad:
-                try:
-                    freal = pregunta + i + 1
-                    CommonUtils.validarcondicional(diccio, part, freal, i, hoja)
-                except:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
-                    freal = pregunta + i + 1 + 1
-                    CommonUtils.validarcondicional(diccio, part, freal, i, hoja)
-                # funcion para validar
 
         if r[0] == 3:
             diccio = r[8]
