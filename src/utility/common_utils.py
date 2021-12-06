@@ -477,7 +477,7 @@ class CommonUtils:
         notabla = []
         totales = CommonUtils.paratotales(npregunta, hopan, preguntas)
         busqueda_condicional = {}
-        if m1 > 18:
+        if m1 > 15:
             if len(delito) > 0 and len(x) > 180:
                 tabla = 2  # tabla de delitos
                 delitotupla = CommonUtils.iral(delito, x, y)
@@ -845,7 +845,7 @@ class CommonUtils:
         defi = []
         li2 = CommonUtils.reducir(li2)
         for tu in tuplas:
-            if li2[0]==tu[0]:
+            if tu[0] in li2:
                 defi.append(tu)
         # print('unicos posibles y tuplas: ',unicos, posibles, tuplas,x,y)
         # unificar filas por celdas combinadas
@@ -865,9 +865,9 @@ class CommonUtils:
             if len(dist) > 0:
                 limite = dist[0]+1
                 rlista = lista[:limite]
-                nlista = [max(rlista)]
+                nlista = rlista
             else:
-                nlista = [max(lista)]
+                nlista = lista
             
         else:
             nlista = lista
@@ -1655,6 +1655,7 @@ class CommonUtils:
     def validar_sabe(hoja, celdas):
         "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
         dv = DataValidation(type="list", formula1='"="",1,2,9"', allow_blank=True)
+        print('celdassssss', celdas)
         hoja.add_data_validation(dv)
 
         for celda in celdas:
