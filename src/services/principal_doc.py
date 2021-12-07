@@ -321,10 +321,8 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             validar_catalogo(pregunta, di, hoja)
 
         if totales != "No":
-            if (
-                len(totales["total"]) == 1 and len(totales["subtotal"]) > 0
-            ):  # para poner el gris del na a toda la fila
-                CommonUtils.poner_gris(letras_validadas, hoja)
+              # para poner el gris del na a toda la fila
+            CommonUtils.poner_gris(letras_validadas, hoja)
 
         print("Todo bien con pregunta ", nter)
         con += 1

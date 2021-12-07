@@ -587,6 +587,7 @@ class CommonUtils:
         tuplas = CommonUtils.tuplasnoval(x, y, part_tab)
         final = CommonUtils.buscar_final_tabla(x,tuplas)
         di['final'] = final
+        di['final1'] = final
         di["tuplas"] = tuplas
         # print('ese es el di de tuplas: ',di)
         cata = CommonUtils.buscarpalabra(npregunta, "(ver catálogo)", hopan, preguntas)
@@ -599,12 +600,12 @@ class CommonUtils:
 
         if len(noa) > 0:
             nli = [tupla for tupla in noa if tupla[1] > 3]
-            if len(sinon) > 0:
+            if sinon:
+                lsinon = [tupla[1] for tupla in sinon]
                 ind = []
                 for tupla in nli:
-                    for tu in sinon:
-                        if tupla[1] != tu[1]:
-                            ind.append(tupla)
+                    if tupla[1] not in lsinon:
+                        ind.append(tupla)
                 if ind:
                     final = CommonUtils.buscar_final_tabla(x,ind)
                     di['final'] = final
@@ -1984,9 +1985,13 @@ class CommonUtils:
                 + Total
                 + ">0,"
                 + NS
-                + ">0,"
+                + ">0,AND("
                 + NA
-                + ">1)),1,0)",
+                + ">1,"
+                + NA
+                + "<"
+                + aha
+                + "))),1,0)",
                 "error_blanco": "=IF(AND("
                 + blancos
                 + ">0,"
@@ -3212,9 +3217,13 @@ class CommonUtils:
                 + Total
                 + ">0,"
                 + NS
-                + ">0,"
+                + ">0,AND("
                 + NA
-                + ">1)),1,0)",
+                + ">1,"
+                + NA
+                + "<"
+                + aha
+                + "))),1,0)",
                 "error_blanco": "=IF(AND("
                 + blancos
                 + ">0,"
@@ -3348,11 +3357,13 @@ class CommonUtils:
                 + total_tabla
                 + '="NA",OR('
                 + Total
-                + ">0,"
-                + NS
-                + ">0,"
+                + ">0,AND("
                 + NA
-                + ">1)),1,0)",
+                + ">1,"
+                + NA
+                + "<"
+                + aha
+                + "))),1,0)",
                 "error_blanco": "=IF(AND("
                 + blancos
                 + ">0,"
@@ -3393,13 +3404,13 @@ class CommonUtils:
                         formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
                     ),
                 )
-            for i in fcon[1:]:
-                hoja.conditional_formatting.add(
-                    i,
-                    FormulaRule(
-                        formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
-                    ),
-                )
+            # for i in fcon[1:]:
+            #     hoja.conditional_formatting.add(
+            #         i,
+            #         FormulaRule(
+            #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
+            #         ),
+            #     )
         except:
             pass
         if autosuma > 0:
@@ -3537,9 +3548,13 @@ class CommonUtils:
             + Total
             + ">0,"
             + NS
-            + ">0,"
+            + ">0,AND("
             + NA
-            + ">1)),1,0)",
+            + ">1,"
+            + NA
+            + "<"
+            + aha
+            + "))),1,0)",
             "error_blanco": "=IF(AND("
             + blancos
             + ">0,"
@@ -3569,13 +3584,14 @@ class CommonUtils:
                         formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
                     ),
                 )
-            for i in fcon[1:]:
-                hoja.conditional_formatting.add(
-                    i,
-                    FormulaRule(
-                        formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
-                    ),
-                )
+            # comentado por que na se valida desde poner gris
+            # for i in fcon[1:]:
+            #     hoja.conditional_formatting.add(
+            #         i,
+            #         FormulaRule(
+            #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
+            #         ),
+            #     )
         except:
             pass
         if autosuma > 0:
@@ -3729,9 +3745,13 @@ class CommonUtils:
             + Total
             + ">0,"
             + NS
-            + ">0,"
+            + ">0,AND("
             + NA
-            + ">1)),1,0)",
+            + ">1,"
+            + NA
+            + "<"
+            + aha
+            + "))),1,0)",
             "error_blanco": "=IF(AND("
             + blancos
             + ">0,"
@@ -3819,13 +3839,14 @@ class CommonUtils:
             hoja.conditional_formatting.add(
                 colu, FormulaRule(formula=[condi[1] + "=1"], stopIfTrue=True, fill=gris)
             )
-            if colu != condi1[0]:
-                hoja.conditional_formatting.add(
-                    colu,
-                    FormulaRule(
-                        formula=[condi1[0] + '="NA"'], stopIfTrue=True, fill=gris
-                    ),
-                )
+            # se comenta por na se valida desde poner gris nada más
+            # if colu != condi1[0]:
+            #     hoja.conditional_formatting.add(
+            #         colu,
+            #         FormulaRule(
+            #             formula=[condi1[0] + '="NA"'], stopIfTrue=True, fill=gris
+            #         ),
+            #     )
 
         coin = az[0]
         ro = 0
