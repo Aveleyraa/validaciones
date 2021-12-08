@@ -2,7 +2,7 @@ import pandas as pd
 import openpyxl as op
 from tkinter import filedialog
 import sys
-sys.path.append('D:\OneDrive - INEGI\Documents\codigos_python\git2\src')
+sys.path.append('D:\OneDrive - INEGI\Documents\proyecto_validaciones\src')
 from services.principal_doc import procesarcoor
 
 
@@ -21,7 +21,7 @@ def main():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 1
+    modulo = 2
 
     libro = import_file_path
 

@@ -10,7 +10,7 @@ import string
 
 
 catalogos = pd.read_csv(
-    r"D:\OneDrive - INEGI\Documents\codigos_python\git2\validaciones\base_catalogos.csv"
+    r"D:\OneDrive - INEGI\Documents\proyecto_validaciones\mock\base_catalogos.csv"
 )
 
 
