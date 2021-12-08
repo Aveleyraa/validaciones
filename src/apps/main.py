@@ -4,6 +4,7 @@ from tkinter import filedialog
 import sys
 sys.path.append('D:\OneDrive - INEGI\Documents\proyecto_validaciones\src')
 from services.principal_doc import procesarcoor
+from utility.save_utils import file_save
 
 
 def main():
@@ -48,8 +49,10 @@ def main():
         shi = book[pagina]
         shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
         procesarcoor(shet, shi)
-
-    book.save("{}_ver1.xlsx".format(modulo))
+    
+    nombre_archivo_salvado = "{}_ver1.xlsx".format(modulo)
+    directory = filedialog.askdirectory()
+    book.save(directory + '/' + nombre_archivo_salvado)
 
 
 if __name__ == "__main__":
