@@ -4,7 +4,6 @@ from tkinter import filedialog
 import sys
 sys.path.append('D:\OneDrive - INEGI\Documents\proyecto_validaciones\src')
 from services.principal_doc import procesarcoor
-from utility.save_utils import file_save
 
 
 def main():
