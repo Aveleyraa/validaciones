@@ -3,7 +3,7 @@ import openpyxl as op
 from tkinter import filedialog
 import sys
 sys.path.append('D:\OneDrive - INEGI\Documents\codigos_python\git2\src')
-from services.principal_doc import procesarcoor
+from services.principal_doc import procesarcoor, p_especificas
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 1
+    modulo = 2
 
     libro = import_file_path
 
@@ -30,11 +30,12 @@ def main():
     p = book.sheetnames
     print(p)
 
-    if modulo == 1:
-        pags = p[4:13]
-
-    if modulo == 2:
-        pags = p[4:8]  # modulo 2
+    para_pags = ['Secc{}'.format(n) for n in range(1,15)]
+    pags = []
+    for val in para_pags:
+        pags1 = [pag for pag in p if pag.endswith(val)]
+        pags += pags1
+     
     print(pags)
     """
     Antes de correr el ciclo, asegurarse de que pags tenga todas las hojas

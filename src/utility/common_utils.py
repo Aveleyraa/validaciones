@@ -6,7 +6,9 @@ from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
+from extractor import Extractor
 
+x_valida = Extractor()
 
 redFill = PatternFill(start_color="EE1111", end_color="EE1111", fill_type="solid")
 
@@ -1401,6 +1403,37 @@ class CommonUtils:
                 hoja.add_data_validation(dv)
         
         return
+    
+    @staticmethod
+    def gris_desagregados(listaNA,listalistas,hoja):
+        """
+        
+    
+        Parameters
+        ----------
+        listaNA : lista con las columnas en donde va condicional NA de desagregados para tipo de delitos
+        listalistas : list. Lista de listas con tuplas
+        hoja : hoja de openpyxl 
+    
+        Returns
+        -------
+        None.
+    
+        """
+        
+        para_formula = listaNA[-2]
+        validar = []
+        validar.append(listalistas[-1][0])
+        for i in listalistas:
+            validar += i
+        nval=[]
+        nval = [valor for valor in validar if valor not in nval]
+        
+        for celda in nval:
+            hoja.conditional_formatting.add(celda,                              
+                                            FormulaRule(formula=[para_formula+'=1'], stopIfTrue=True, fill=gris))
+            
+        return
 
     @staticmethod
     def poner_gris(listalistas, hoja):
@@ -2598,6 +2631,7 @@ class CommonUtils:
             tr1 = i + str(freal + 2)
             condi.append(tr1)
         CommonUtils.escribirgeneral(todo, formulas, hoja)
+        x_valida.extraer(condi)
         condi1 = []  # lista de letras que tienen los numeros de la fila
         for l in letcol:
             condi1.append(CommonUtils.lw(l, freal + (tupla[0] - fila) + 2, 2))
@@ -3821,6 +3855,7 @@ class CommonUtils:
             tr1 = i + str(freal + 2)
             condi.append(tr1)
         CommonUtils.escribirgeneral(todo, formulas, hoja)
+        x_valida.extraer(condi)
         condi1 = []  # lista de letras que tienen los numeros de la fila
         c = 0
         for l in letcol:
