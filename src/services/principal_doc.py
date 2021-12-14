@@ -40,10 +40,10 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             tuplas = diccio["tuplas"]
             ad = CommonUtils.masdeunatablauni(tuplas)
             for i in ad:
-                try:
+                if nter != '8.1.-':
                     freal = pregunta + i + 1
                     CommonUtils.validarcondicional(diccio, part, freal, i, hoja)
-                except:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
+                else:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
                     freal = pregunta + i + 1 + 1
                     for tuplas in part:
                         npart = [[(tupla[0]-1,tupla[1]) for tupla in tuplas]]
@@ -368,10 +368,10 @@ def p_especificas(hopan,hoja,preguntas_validar):
                 tuplas = diccio["tuplas"]
                 ad = CommonUtils.masdeunatablauni(tuplas)
                 for i in ad:
-                    try:
+                    if nter != '8.1.-':
                         freal = pregunta + i + 1
                         CommonUtils.validarcondicional(diccio, part, freal, i, hoja)
-                    except:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
+                    else:  # porque pusieron un encabezado todo combinado y había que sumar un uno para ajustar, ya que prolema de merge cell
                         freal = pregunta + i + 1 + 1
                         for tuplas in part:
                             npart = [[(tupla[0]-1,tupla[1]) for tupla in tuplas]]

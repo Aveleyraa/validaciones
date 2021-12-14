@@ -1331,19 +1331,18 @@ class CommonUtils:
         diccionario = di['temporales']
         abc = list(string.ascii_uppercase)+['AA','AB','AC','AD']
         
-        
+        final = di['final']-1
         if '(aaaa)' in diccionario:
             cor = diccionario['(aaaa)']
             for tupla in cor:
                 letra = abc[tupla[1]]
                 fila = str(tupla[0]+pregunta+3)
-                final = str(di['final']+tupla[0] + 2+pregunta)
                 celda = letra+fila
-                celdaf = letra+final
+                celdas = CommonUtils.emparejar_coordenadas([celda], final)
                 dv = DataValidation(type="whole", operator="between",
                                     formula1=2000, formula2=2050,
                                     allow_blank=True)
-                dv.add(f'{celda}:{celdaf}')
+                dv.add(celdas[0])
                 hoja.add_data_validation(dv)
         
         if '(mm)' in diccionario:
@@ -1351,13 +1350,12 @@ class CommonUtils:
             for tupla in cor:
                 letra = abc[tupla[1]]
                 fila = str(tupla[0]+pregunta+3)
-                final = str(di['final']+tupla[0] + 2+pregunta)
-                celdaf = letra+final
                 celda = letra+fila
+                celdas = CommonUtils.emparejar_coordenadas([celda], final)
                 dv = DataValidation(type="whole", operator="between",
                                     formula1=1, formula2=12,
                                     allow_blank=True)
-                dv.add(f'{celda}:{celdaf}')
+                dv.add(celdas[0])
                 hoja.add_data_validation(dv)
         
         if '(dd)' in diccionario:
@@ -1365,13 +1363,12 @@ class CommonUtils:
             for tupla in cor:
                 letra = abc[tupla[1]]
                 fila = str(tupla[0]+pregunta+3)
-                final = str(di['final']+tupla[0] + 2+pregunta)
-                celdaf = letra+final
                 celda = letra+fila
+                celdas = CommonUtils.emparejar_coordenadas([celda], final)
                 dv = DataValidation(type="whole", operator="between",
                                     formula1=1, formula2=31,
                                     allow_blank=True)
-                dv.add(f'{celda}:{celdaf}')
+                dv.add(celdas[0])
                 hoja.add_data_validation(dv)
         
         if '(años)' in diccionario:
@@ -1379,13 +1376,12 @@ class CommonUtils:
             for tupla in cor:
                 letra = abc[tupla[1]]
                 fila = str(tupla[0]+pregunta+3)
-                final = str(di['final']+tupla[0] + 2+pregunta)
-                celdaf = letra+final
                 celda = letra+fila
+                celdas = CommonUtils.emparejar_coordenadas([celda], final)
                 dv = DataValidation(type="whole", operator="between",
                                     formula1=1, formula2=99,
                                     allow_blank=True)
-                dv.add(f'{celda}:{celdaf}')
+                dv.add(celdas[0])
                 hoja.add_data_validation(dv)
                 
         if 'Edad\n(años)' in diccionario:
@@ -1393,16 +1389,50 @@ class CommonUtils:
             for tupla in cor:
                 letra = abc[tupla[1]]
                 fila = str(tupla[0]+pregunta+3)
-                final = str(di['final']+tupla[0] + 1+pregunta)
-                celdaf = letra+final
                 celda = letra+fila
+                celdas = CommonUtils.emparejar_coordenadas([celda], final)
                 dv = DataValidation(type="whole", operator="between",
                                     formula1=18, formula2=99,
                                     allow_blank=True)
-                dv.add(f'{celda}:{celdaf}')
+                dv.add(celdas[0])
                 hoja.add_data_validation(dv)
         
         return
+    
+    @staticmethod
+    def emparejar_coordenadas(lista_inicio,numero_fin):
+        """
+        
+    
+        Parameters
+        ----------
+        lista_inicio : list. Coordenadas de inicio de tabla tipo excel
+        numero_fin : int. numero de filas que contiene la tabla
+    
+        Returns
+        -------
+        coords : list. Lista con coordenadas de rangos inicio-fin tipo excel.
+        Ejemplo:  'A1:A10'
+    
+        """
+        
+        coords = []
+        
+        for el in lista_inicio:
+            numeroi = [val for val in el if val.isdigit()]
+            a = '0'
+            for i in numeroi:
+                a += i 
+            cifra_inicio = int(a)
+            listaleras = el.split(str(cifra_inicio))
+            letra_columna = listaleras[0]
+            cifra_fin = cifra_inicio + numero_fin
+            if cifra_fin < cifra_inicio:
+                cifra_fin = cifra_inicio
+            corrdenada_final = letra_columna + str(cifra_fin) 
+            coords.append(el + ':' + corrdenada_final)                    
+
+        return coords
     
     @staticmethod
     def gris_desagregados(listaNA,listalistas,hoja):
@@ -1569,7 +1599,8 @@ class CommonUtils:
             a = abc1[val]
             letcol.append(a)
         cords = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
-
+        final = diccionario['final1']-1
+        ncords = CommonUtils.emparejar_coordenadas(cords, final)
         if "sabe" in diccionario:
             # mismo proceso que totales y subtotales, se cancela todo a la derecha hasta que localiza otro si fuera el caso. Hay que hacer iteraciones
             sabe = diccionario["sabe"]
@@ -1586,9 +1617,10 @@ class CommonUtils:
                 b = abc1[a]
                 cols.append(b)
             corval = CommonUtils.crearcoordenada1(cols, sabe, fila, freal)
-            CommonUtils.validar_sabe(hoja, corval)
+            ncor= CommonUtils.emparejar_coordenadas(corval, final)
+            CommonUtils.validar_sabe(hoja, ncor, '1,2,9')
             # función de condicionales
-            CommonUtils.condic_sabe(hoja, corval, cords)
+            CommonUtils.condic_sabe(hoja,ncor,ncords,1)
         if "sabe1" in diccionario:
             sabe = diccionario["sabe1"]
             sabetu = []
@@ -1604,9 +1636,10 @@ class CommonUtils:
                 b = abc1[a]
                 cols.append(b)
             corval = CommonUtils.crearcoordenada1(cols, sabe, fila, freal)
-            CommonUtils.validar_sabe1(hoja, corval)
+            ncor= CommonUtils.emparejar_coordenadas(corval, final)
+            CommonUtils.validar_sabe(hoja, ncor, '1,2,3,9')
             # función de condicionales
-            CommonUtils.condic_sabe1(hoja, corval, cords)
+            CommonUtils.condic_sabe(hoja,ncor,ncords,2)
         if "noaplica" in diccionario:
             sabe = diccionario["noaplica"]
             sabetu = []
@@ -1622,9 +1655,10 @@ class CommonUtils:
                 b = abc1[a]
                 cols.append(b)
             corval = CommonUtils.crearcoordenada1(cols, sabe, fila, freal)
-            CommonUtils.validar_sabe2(hoja, corval)
+            ncor= CommonUtils.emparejar_coordenadas(corval, final)
+            CommonUtils.validar_sabe(hoja, ncor, '1,2,8,9')
             # función de condicionales
-            CommonUtils.condic_sabe2(hoja, corval, cords)
+            CommonUtils.condic_sabe(hoja,ncor,ncords,3)
         if "NA" in diccionario:
             sabe = diccionario["NA"]
             sabetu = []
@@ -1640,232 +1674,103 @@ class CommonUtils:
                 b = abc1[a]
                 cols.append(b)
             corval = CommonUtils.crearcoordenada1(cols, sabe, fila, freal)
-            CommonUtils.validar_sabe3(hoja, corval)
+            ncor= CommonUtils.emparejar_coordenadas(corval, final)
+            CommonUtils.validar_sabe(hoja, ncor, 'X')
             # función de condicionales
-            CommonUtils.condic_sabe3(hoja, corval, cords)
+            CommonUtils.condic_sabe(hoja,ncor,ncords,4)
 
         return
 
     @staticmethod
-    def condic_sabe(hoja, sabe, columnas):
+    def condic_sabe(hoja, sabe, columnas, codigo):
         "hoja de openpy, sabe: coordenadas de catalogo sinonosabe, columnas: coordenadas de columnas de la tabla. Sabe y columnas deben ser listas de coordenadas"
-        no_en_cords = [cor for cor in sabe if cor not in columnas]
+        no_en_cords = [cor for cor in sabe if cor  not in columnas]
         todas = no_en_cords + columnas
         indice = []
         c = 0
+    
         for cor in todas:
-            if cor in sabe:
-                indice.append(c)
+            for i in sabe:
+                if i in cor:
+                    indice.append(c)
             c += 1
         ldl = []
         s = 1
         for i in indice:
             try:
-
+                
                 b = indice[s]
                 n = todas[i:b]
-                if (
-                    todas[i] == todas[b - 1]
-                ):  # para las que son contiguias que salga toda la fila con el condicional
+                if todas[i] == todas[b-1]: #para las que son contiguias que salga toda la fila con el condicional
                     n = todas[i:]
-
+                
             except:
                 n = todas[i:]
             ldl.append(n)
             s += 1
+        
         for lista in ldl:
             for ele in lista[1:]:
-                hoja.conditional_formatting.add(
-                    ele,
-                    FormulaRule(
-                        formula=["=OR(" + lista[0] + "=2," + lista[0] + "=9)"],
-                        stopIfTrue=True,
-                        fill=gris,
-                    ),
-                )
+                alfa = lista[0].split(':')
+                lista[0] = alfa[0]
+                if codigo == 1:
+                    hoja.conditional_formatting.add(ele,
+                                                    FormulaRule(
+                                                        formula=[
+                                                            '=OR('
+                                                            + lista[0]
+                                                            + '=2,'
+                                                            + lista[0]
+                                                            + '=9)'],
+                                                        stopIfTrue=True,
+                                                        fill=gris))
+                if codigo == 2:
+                    hoja.conditional_formatting.add(ele,
+                                                    FormulaRule(
+                                                        formula=[
+                                                            '=OR('
+                                                            + lista[0]
+                                                            + '=2,'
+                                                            + lista[0]
+                                                            + '=3,'
+                                                            + lista[0]
+                                                            + '=9)'],
+                                                        stopIfTrue=True,
+                                                        fill=gris))
+                if codigo == 3:
+                    hoja.conditional_formatting.add(ele,
+                                                    FormulaRule(
+                                                        formula=[
+                                                            '=OR('
+                                                            + lista[0]
+                                                            + '=2,'
+                                                            + lista[0]
+                                                            + '=8,'
+                                                            + lista[0]
+                                                            + '=9)'],
+                                                        stopIfTrue=True,
+                                                        fill=gris))
+                if codigo == 4:
+                    hoja.conditional_formatting.add(ele,
+                                                    FormulaRule(
+                                                        formula=[
+                                                            lista[0]
+                                                            + '="X"'],
+                                                        stopIfTrue=True,
+                                                        fill=gris))        
         return
 
     @staticmethod
-    def validar_sabe(hoja, celdas):
+    def validar_sabe(hoja, celdas, formula):
         "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
-        dv = DataValidation(type="list", formula1='"="",1,2,9"', allow_blank=True)
-        print('celdassssss', celdas)
+        dv = DataValidation(type="list", formula1= '"="",{}"'.format(formula), allow_blank=True)
+    
         hoja.add_data_validation(dv)
-
+        cel = celdas[0].split(':')
+        a1 = hoja[cel[0]]
+        a1.value = ""
         for celda in celdas:
-            a1 = hoja[celda]
-            a1.value = ""
-            dv.add(a1)
-        return
-
-    @staticmethod
-    def condic_sabe1(hoja, sabe, columnas):
-        "hoja de openpy, sabe: coordenadas de catalogo sinonosabe, columnas: coordenadas de columnas de la tabla. Sabe y columnas deben ser listas de coordenadas"
-        no_en_cords = [cor for cor in sabe if cor not in columnas]
-        todas = no_en_cords + columnas
-        indice = []
-        c = 0
-        for cor in todas:
-            if cor in sabe:
-                indice.append(c)
-            c += 1
-        ldl = []
-        s = 1
-        for i in indice:
-            try:
-
-                b = indice[s]
-                n = todas[i:b]
-                if (
-                    todas[i] == todas[b - 1]
-                ):  # para las que son contiguias que salga toda la fila con el condicional
-                    n = todas[i:]
-
-            except:
-                n = todas[i:]
-            ldl.append(n)
-            s += 1
-        for lista in ldl:
-            for ele in lista[1:]:
-                hoja.conditional_formatting.add(
-                    ele,
-                    FormulaRule(
-                        formula=[
-                            "=OR("
-                            + lista[0]
-                            + "=2,"
-                            + lista[0]
-                            + "=3,"
-                            + lista[0]
-                            + "=9)"
-                        ],
-                        stopIfTrue=True,
-                        fill=gris,
-                    ),
-                )
-        return
-
-    @staticmethod
-    def validar_sabe1(hoja, celdas):
-        "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
-        dv = DataValidation(type="list", formula1='"="",1,2,3,9"', allow_blank=True)
-
-        hoja.add_data_validation(dv)
-
-        for celda in celdas:
-            a1 = hoja[celda]
-            a1.value = ""
-            dv.add(a1)
-        return
-
-    @staticmethod
-    def condic_sabe2(hoja, sabe, columnas):
-        "hoja de openpy, sabe: coordenadas de catalogo sinonosabe, columnas: coordenadas de columnas de la tabla. Sabe y columnas deben ser listas de coordenadas"
-        no_en_cords = [cor for cor in sabe if cor not in columnas]
-        todas = no_en_cords + columnas
-        indice = []
-        c = 0
-        for cor in todas:
-            if cor in sabe:
-                indice.append(c)
-            c += 1
-        ldl = []
-        s = 1
-        for i in indice:
-            try:
-
-                b = indice[s]
-                n = todas[i:b]
-                if (
-                    todas[i] == todas[b - 1]
-                ):  # para las que son contiguias que salga toda la fila con el condicional
-                    n = todas[i:]
-
-            except:
-                n = todas[i:]
-            ldl.append(n)
-            s += 1
-        for lista in ldl:
-            for ele in lista[1:]:
-                hoja.conditional_formatting.add(
-                    ele,
-                    FormulaRule(
-                        formula=[
-                            "=OR("
-                            + lista[0]
-                            + "=2,"
-                            + lista[0]
-                            + "=8,"
-                            + lista[0]
-                            + "=9)"
-                        ],
-                        stopIfTrue=True,
-                        fill=gris,
-                    ),
-                )
-        return
-
-    @staticmethod
-    def validar_sabe2(hoja, celdas):
-        "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
-        dv = DataValidation(type="list", formula1='"="",1,2,8,9"', allow_blank=True)
-
-        hoja.add_data_validation(dv)
-
-        for celda in celdas:
-            a1 = hoja[celda]
-            a1.value = ""
-            dv.add(a1)
-        return
-
-    @staticmethod
-    def condic_sabe3(hoja, sabe, columnas):
-        "hoja de openpy, sabe: coordenadas de catalogo sinonosabe, columnas: coordenadas de columnas de la tabla. Sabe y columnas deben ser listas de coordenadas"
-        no_en_cords = [cor for cor in sabe if cor not in columnas]
-        todas = no_en_cords + columnas
-        indice = []
-        c = 0
-        for cor in todas:
-            if cor in sabe:
-                indice.append(c)
-            c += 1
-        ldl = []
-        s = 1
-        for i in indice:
-            try:
-
-                b = indice[s]
-                n = todas[i:b]
-                if (
-                    todas[i] == todas[b - 1]
-                ):  # para las que son contiguias que salga toda la fila con el condicional
-                    n = todas[i:]
-
-            except:
-                n = todas[i:]
-            ldl.append(n)
-            s += 1
-        for lista in ldl:
-            for ele in lista[1:]:
-                hoja.conditional_formatting.add(
-                    ele,
-                    FormulaRule(
-                        formula=[lista[0] + '="X"'], stopIfTrue=True, fill=gris
-                    ),
-                )
-        return
-
-    @staticmethod
-    def validar_sabe3(hoja, celdas):
-        "Hoja de openpy y celdas debe ser una lista para iterar con las lertras ya bien definidas"
-        dv = DataValidation(type="list", formula1='"="",X"', allow_blank=True)
-
-        hoja.add_data_validation(dv)
-
-        for celda in celdas:
-            a1 = hoja[celda]
-            a1.value = ""
-            dv.add(a1)
+            dv.add(celda)
         return
 
     @staticmethod
