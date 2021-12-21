@@ -21,7 +21,7 @@ def main():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 2
+    modulo = 1
 
     libro = import_file_path
 
@@ -30,13 +30,12 @@ def main():
     p = book.sheetnames
     print(p)
 
-    para_pags = ['Secc{}'.format(n) for n in range(1,15)]
+    para_pags = ['Secc']
     pags = []
     for val in para_pags:
-        pags1 = [pag for pag in p if pag.endswith(val)]
+        pags1 = [pag for pag in p if val in pag]
         pags += pags1
-     
-    print(pags)
+    print(pags)  
     """
     Antes de correr el ciclo, asegurarse de que pags tenga todas las hojas
     en las que se van a escribir validaciones con este método.
