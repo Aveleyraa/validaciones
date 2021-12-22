@@ -62,7 +62,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             tupla.sort()
             print("inicios para tabla normal: ", a)
             c = 0
-            for i in inicios:
+            for i in inicios[:1]:
                 freal = pregunta + i  # fila real
                 fin = r[6]
                 ntuplas = []
@@ -281,7 +281,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             CommonUtils.gris_desagregados(
                 na_desagregados, letras_validadas, hoja
                 )
-        if r[2] == 1 and r[0] == 1:  # tablas de unica columna de respuesta
+        if r[2] == 1 and r[0] == 1 and r[1]==0:  # tablas de unica columna de respuesta
             ad = CommonUtils.masdeunatablauni(r[3])
             c = 0
             ad.sort()
@@ -390,7 +390,7 @@ def p_especificas(hopan,hoja,preguntas_validar):
                 tupla.sort()
                 print("inicios para tabla normal: ", a)
                 c = 0
-                for i in inicios:
+                for i in inicios[:1]:
                     freal = pregunta + i  # fila real
                     fin = r[6]
                     ntuplas = []
@@ -609,7 +609,7 @@ def p_especificas(hopan,hoja,preguntas_validar):
                 CommonUtils.gris_desagregados(
                     na_desagregados, letras_validadas, hoja
                     )
-            if r[2] == 1 and r[0] == 1:  # tablas de unica columna de respuesta
+            if r[2] == 1 and r[0] == 1 and r[1] ==0:  # tablas de unica columna de respuesta
                 ad = CommonUtils.masdeunatablauni(r[3])
                 c = 0
                 ad.sort()

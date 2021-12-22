@@ -2,7 +2,7 @@ import pandas as pd
 import openpyxl as op
 from tkinter import filedialog
 import sys
-sys.path.append('D:\OneDrive - INEGI\Documents\codigos_python\git2\src')
+sys.path.append('D:\Trabajo\Documentos\codigos_python\algoritmo_penitenciario2022')
 from services.principal_doc import procesarcoor, p_especificas
 
 

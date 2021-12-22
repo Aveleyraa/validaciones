@@ -509,8 +509,10 @@ class CommonUtils:
             busqueda_condicional = CommonUtils.varias_busquedas(
                 npregunta, hopan, x, y, tabla_partes, preguntas
             )  # es tuplas de lista sin validar aritmeticamente
+            if tablaunica != 0:
+                busqueda_condicional['final'] = 0
+                busqueda_condicional['final1'] = 0
         
-
         ultimo_escrito = x[-1]
         ultimis = (
             ultimo_escrito + 3
