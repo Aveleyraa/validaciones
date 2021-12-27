@@ -6,7 +6,7 @@ Created on Wed Nov  3 11:07:44 2021
 """
 
 from services.catalogos import validar_catalogo
-from utility.common_utils import CommonUtils, x_valida
+from utility.common_utils import CommonUtils, x_valida,final_tabla
 
 
 def procesarcoor(hopan, hoja):  # funcion principal!!
@@ -325,8 +325,10 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
             validar_catalogo(pregunta, di, hoja)
 
         if totales != "No":
-              # para poner el gris del na a toda la fila
-            CommonUtils.poner_gris(letras_validadas, hoja)
+            fn = final_tabla.juntar()
+            if not fn:
+                fn =[0]
+            CommonUtils.poner_gris(letras_validadas,hoja,fn[0])
 
         print("Todo bien con pregunta ", nter)
         con += 1
@@ -653,8 +655,10 @@ def p_especificas(hopan,hoja,preguntas_validar):
                 validar_catalogo(pregunta, di, hoja)
     
             if totales != "No":
-                  # para poner el gris del na a toda la fila
-                CommonUtils.poner_gris(letras_validadas, hoja)
+                fn = final_tabla.juntar()
+                if not fn:
+                    fn =[0]
+                CommonUtils.poner_gris(letras_validadas,hoja,fn[0])
     
             print("Todo bien con pregunta ", nter)
             con += 1

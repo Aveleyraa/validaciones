@@ -10,6 +10,8 @@ from extractor import Extractor
 
 x_valida = Extractor()
 
+final_tabla = Extractor()
+
 redFill = PatternFill(start_color="EE1111", end_color="EE1111", fill_type="solid")
 
 gris = PatternFill(fill_type="mediumGray", patternType="mediumGray")
@@ -1460,15 +1462,15 @@ class CommonUtils:
             validar += i
         nval=[]
         nval = [valor for valor in validar if valor not in nval]
-        
-        for celda in nval:
+        nval1 = CommonUtils.emparejar_coordenadas(nval,164)
+        for celda in nval1:
             hoja.conditional_formatting.add(celda,                              
                                             FormulaRule(formula=[para_formula+'=1'], stopIfTrue=True, fill=gris))
             
         return
 
     @staticmethod
-    def poner_gris(listalistas, hoja):
+    def poner_gris(listalistas, hoja, iterar):
         """
         
 
@@ -1476,6 +1478,7 @@ class CommonUtils:
         ----------
         listalistas : list. Recibe lista de listas con tuplas
         hoja : hoja de excel en openpyxl
+        iterar: int. Numero que indica cuántas filas tiene la tabla
 
         Returns
         -------
@@ -1491,7 +1494,8 @@ class CommonUtils:
             validar += i
         nval = []
         nval = [valor for valor in validar if valor not in nval]
-        for celda in nval[1:]:
+        nval1 = CommonUtils.emparejar_coordenadas(nval,iterar)
+        for celda in nval1[1:]:
             hoja.conditional_formatting.add(
                 celda,
                 FormulaRule(formula=[nval[0] + '="NA"'], stopIfTrue=True, fill=gris),
@@ -2504,7 +2508,7 @@ class CommonUtils:
             letcol.append(s)
         formulas = ["coincide_con_desagregados?", "hay NA", "mayor al 25%"]
         x1 = CommonUtils.variables(
-            fila - 2, copia_tuplas, freal, 0, hoja, part_tab, letras, men
+            fila - 2, copia_tuplas, freal, autosu-2, hoja, part_tab, letras, men
         )
         ax1 = x1[0]
         x1 = x1[1]
@@ -2540,8 +2544,16 @@ class CommonUtils:
         CommonUtils.escribirgeneral(todo, formulas, hoja)
         x_valida.extraer(condi)
         condi1 = []  # lista de letras que tienen los numeros de la fila
+        condi2 = []
         for l in letcol:
+            condi2.append(CommonUtils.lw(l,freal+(tupla[0]-fila)+166,2))
             condi1.append(CommonUtils.lw(l, freal + (tupla[0] - fila) + 2, 2))
+        condi3 = []
+        c = 0
+        for letra in condi1:
+            condi3.append(letra+':'+condi2[c])
+            c += 1
+        condi1 = condi3
         hoja.conditional_formatting.add(
             condi1[0],
             FormulaRule(formula=[condi[0] + "=1"], stopIfTrue=True, fill=redFill),
@@ -2629,11 +2641,11 @@ class CommonUtils:
             escr = ["=IF(" + ar1 + "/" + b + ">0.25,1,0)"]
             CommonUtils.escribirgeneral(pri, escr, hoja)
             ya += 1
-        escr = [
-            "=IF(SUM(" + x1[1] + ":" + x1[-3] + ")>0,1,0)"
-        ]  # estas lineas son para formula de hay
-        donde = [x1[-1]]
-        CommonUtils.escribirgeneral(donde, escr, hoja)
+        # escr = [
+        #     "=IF(SUM(" + x1[1] + ":" + x1[-3] + ")>0,1,0)"
+        # ]  # estas lineas son para formula de hay
+        # donde = [x1[-1]]
+        # CommonUtils.escribirgeneral(donde, escr, hoja)
 
         return ax1
 
@@ -3065,313 +3077,327 @@ class CommonUtils:
         for i in columnas:
             s = abc1[i]
             letcol.append(s)
-        coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
-        ccoordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
-        if part_tab == 0:
-            val_des = coordss[1] + ":" + coordss[-1]
-            total_tabla = coordss[0]
-            Total = "SUM(" + val_des + ")"
-            fila_res = coordss[0] + ":" + coordss[-1]
-            NS = "COUNTIF(" + fila_res + ',"NS")'
-            aha = str(len(coordss))
-            coincide = (
-                "IF(OR("
-                + Total
-                + "="
-                + total_tabla
-                + ","
-                + total_tabla
-                + '="",AND('
-                + total_tabla
-                + ">0,"
-                + NS
-                + "="
-                + str(len(coordss) - 1)
-                + ")),0,1)"
-            )
-            blancos = CommonUtils.parablancos(coordss)
-            texto = "COUNTIF(" + fila_res + ',"=*")'
-            NA = "COUNTIF(" + fila_res + ',"NA")'
-            hay = (
-                "IF(AND("
-                + total_tabla
-                + "=0,"
-                + Total
-                + ">0,"
-                + NS
-                + "=0),1,0),IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0),=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0),IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0),IF(AND('
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0),IF('
-                + texto
-                + "<>SUM("
-                + NS
-                + ","
-                + NA
-                + "),1,0)"
-            )
-            formulas = {
-                "error_cero": "=IF(AND("
-                + total_tabla
-                + "=0,OR("
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0)",
-                "error_NS": "=IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0)",
-                "error_NA": "=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0,AND("
-                + NA
-                + ">1,"
-                + NA
-                + "<"
-                + aha
-                + "))),1,0)",
-                "error_blanco": "=IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_suma": "=IF(AND("
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-            }
+        alt1 = []
+        fcon1 = []
+        iterar = autosuma - freal - 1
+        if iterar > 0:
+            iterar += 1
         else:
-            print("tuplas de tabla en partes: ", part_tab)
-            aderir = []
-            ncorr = ccoordss
-            for lista in part_tab:
-                letcol1 = []
-                fini = freal - fila
-                columnas1 = []
-                for tupla in lista:
-                    aq = tupla[1]
-                    columnas1.append(aq)
-                for i in columnas1:
-                    s1 = abc1[i]
-                    letcol1.append(s1)
-                cor = CommonUtils.crearcoordenada(letcol1, fini + lista[0][0])
-                ncorr += cor
-                tor = cor[0] + ":" + cor[-1]
-                aderir.append(tor)
-            val_des = coordss[1] + ":" + coordss[-1]
-            total_tabla = coordss[0]
-
-            fila_res = coordss[0] + ":" + coordss[-1]
-
-            blancos = CommonUtils.parablancos(ncorr)
-            aha = str(len(ncorr))
-            aha1 = str(len(ncorr) - 1)
-            NS = "COUNTIF(" + fila_res + ',"NS")'
-            texto = "COUNTIF(" + fila_res + ',"=*")'
-            NA = "COUNTIF(" + fila_res + ',"NA")'
-            for i in aderir:
-                val_des += "," + i
-                NS += "+COUNTIF(" + i + ',"NS")'
-                texto += "+COUNTIF(" + i + ',"=*")'
-                NA += "+COUNTIF(" + i + ',"NA")'
-            Total = "SUM(" + val_des + ")"
-            coincide = (
-                "IF(OR("
-                + Total
-                + "="
-                + total_tabla
-                + ","
-                + total_tabla
-                + '="",AND('
-                + total_tabla
-                + ">0,"
-                + NS
-                + "="
-                + aha1
-                + ")),0,1)"
-            )
-            hay = (
-                "IF(AND("
-                + total_tabla
-                + "=0,"
-                + Total
-                + ">0,"
-                + NS
-                + "=0),1,0),IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0),=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0),IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0),IF(AND('
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0),IF('
-                + texto
-                + "<>SUM("
-                + NS
-                + ","
-                + NA
-                + "),1,0)"
-            )
-            formulas = {
-                "error_cero": "=IF(AND("
-                + total_tabla
-                + "=0,OR("
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0)",
-                "error_NS": "=IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0)",
-                "error_NA": "=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,AND("
-                + NA
-                + ">1,"
-                + NA
-                + "<"
-                + aha
-                + "))),1,0)",
-                "error_blanco": "=IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_suma": "=IF(AND("
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-            }
-        alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
-        # print('alttttttttttttt', alt)
-
-        # condi1 =[]
-        # for l in letcol:
-        #     condi1.append(lw(l,freal+(tupla[0]-fila),2))
-
-        # for colu in condi1[1:]:
-
-        #     hoja.conditional_formatting.add(colu,
-        #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
-        try:
-            fcon = CommonUtils.condicional(letcol, freal, hoja, fila, tuplas)
-
-            for i in fcon:
-                hoja.conditional_formatting.add(
-                    i,
-                    FormulaRule(
-                        formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
-                    ),
+            iterar = 1
+        final_tabla.extraer([iterar])
+        dfreal = freal + 0
+        for i in range(0,iterar):
+            freal = dfreal + i
+            coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
+            ccoordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
+            if part_tab == 0:
+                val_des = coordss[1] + ":" + coordss[-1]
+                total_tabla = coordss[0]
+                Total = "SUM(" + val_des + ")"
+                fila_res = coordss[0] + ":" + coordss[-1]
+                NS = "COUNTIF(" + fila_res + ',"NS")'
+                aha = str(len(coordss))
+                coincide = (
+                    "IF(OR("
+                    + Total
+                    + "="
+                    + total_tabla
+                    + ","
+                    + total_tabla
+                    + '="",AND('
+                    + total_tabla
+                    + ">0,"
+                    + NS
+                    + "="
+                    + str(len(coordss) - 1)
+                    + ")),0,1)"
                 )
-            # for i in fcon[1:]:
-            #     hoja.conditional_formatting.add(
-            #         i,
-            #         FormulaRule(
-            #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
-            #         ),
-            #     )
-        except:
-            pass
-        if autosuma > 0:
+                blancos = CommonUtils.parablancos(coordss)
+                texto = "COUNTIF(" + fila_res + ',"=*")'
+                NA = "COUNTIF(" + fila_res + ',"NA")'
+                hay = (
+                    "IF(AND("
+                    + total_tabla
+                    + "=0,"
+                    + Total
+                    + ">0,"
+                    + NS
+                    + "=0),1,0),IF(OR(AND("
+                    + total_tabla
+                    + '="NS",'
+                    + Total
+                    + ">0),AND("
+                    + total_tabla
+                    + '="NS",'
+                    + NS
+                    + "<2)),1,0),=IF(AND("
+                    + total_tabla
+                    + '="NA",OR('
+                    + Total
+                    + ">0,"
+                    + NS
+                    + ">0)),1,0),IF(AND("
+                    + blancos
+                    + ">0,"
+                    + blancos
+                    + "<"
+                    + aha
+                    + ","
+                    + total_tabla
+                    + '<>"NA"),1,0),IF(AND('
+                    + coincide
+                    + "=1,"
+                    + total_tabla
+                    + '<>"NS",'
+                    + total_tabla
+                    + '<>"NA"),1,0),IF('
+                    + texto
+                    + "<>SUM("
+                    + NS
+                    + ","
+                    + NA
+                    + "),1,0)"
+                )
+                formulas = {
+                    "error_cero": "=IF(AND("
+                    + total_tabla
+                    + "=0,OR("
+                    + Total
+                    + ">0,"
+                    + NS
+                    + ">0)),1,0)",
+                    "error_NS": "=IF(OR(AND("
+                    + total_tabla
+                    + '="NS",'
+                    + Total
+                    + ">0),AND("
+                    + total_tabla
+                    + '="NS",'
+                    + NS
+                    + "<2)),1,0)",
+                    "error_NA": "=IF(AND("
+                    + total_tabla
+                    + '="NA",OR('
+                    + Total
+                    + ">0,"
+                    + NS
+                    + ">0,AND("
+                    + NA
+                    + ">1,"
+                    + NA
+                    + "<"
+                    + aha
+                    + "))),1,0)",
+                    "error_blanco": "=IF(AND("
+                    + blancos
+                    + ">0,"
+                    + blancos
+                    + "<"
+                    + aha
+                    + ","
+                    + total_tabla
+                    + '<>"NA"),1,0)',
+                    "error_suma": "=IF(AND("
+                    + coincide
+                    + "=1,"
+                    + total_tabla
+                    + '<>"NS",'
+                    + total_tabla
+                    + '<>"NA"),1,0)',
+                    "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
+                    "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
+                }
+            else:
+                print("tuplas de tabla en partes: ", part_tab)
+                aderir = []
+                ncorr = ccoordss
+                for lista in part_tab:
+                    letcol1 = []
+                    fini = freal - fila
+                    columnas1 = []
+                    for tupla in lista:
+                        aq = tupla[1]
+                        columnas1.append(aq)
+                    for i in columnas1:
+                        s1 = abc1[i]
+                        letcol1.append(s1)
+                    cor = CommonUtils.crearcoordenada(letcol1, fini + lista[0][0])
+                    ncorr += cor
+                    tor = cor[0] + ":" + cor[-1]
+                    aderir.append(tor)
+                val_des = coordss[1] + ":" + coordss[-1]
+                total_tabla = coordss[0]
+    
+                fila_res = coordss[0] + ":" + coordss[-1]
+    
+                blancos = CommonUtils.parablancos(ncorr)
+                aha = str(len(ncorr))
+                aha1 = str(len(ncorr) - 1)
+                NS = "COUNTIF(" + fila_res + ',"NS")'
+                texto = "COUNTIF(" + fila_res + ',"=*")'
+                NA = "COUNTIF(" + fila_res + ',"NA")'
+                for i in aderir:
+                    val_des += "," + i
+                    NS += "+COUNTIF(" + i + ',"NS")'
+                    texto += "+COUNTIF(" + i + ',"=*")'
+                    NA += "+COUNTIF(" + i + ',"NA")'
+                Total = "SUM(" + val_des + ")"
+                coincide = (
+                    "IF(OR("
+                    + Total
+                    + "="
+                    + total_tabla
+                    + ","
+                    + total_tabla
+                    + '="",AND('
+                    + total_tabla
+                    + ">0,"
+                    + NS
+                    + "="
+                    + aha1
+                    + ")),0,1)"
+                )
+                hay = (
+                    "IF(AND("
+                    + total_tabla
+                    + "=0,"
+                    + Total
+                    + ">0,"
+                    + NS
+                    + "=0),1,0),IF(OR(AND("
+                    + total_tabla
+                    + '="NS",'
+                    + Total
+                    + ">0),AND("
+                    + total_tabla
+                    + '="NS",'
+                    + NS
+                    + "<2)),1,0),=IF(AND("
+                    + total_tabla
+                    + '="NA",OR('
+                    + Total
+                    + ">0,"
+                    + NS
+                    + ">0)),1,0),IF(AND("
+                    + blancos
+                    + ">0,"
+                    + blancos
+                    + "<"
+                    + aha
+                    + ","
+                    + total_tabla
+                    + '<>"NA"),1,0),IF(AND('
+                    + coincide
+                    + "=1,"
+                    + total_tabla
+                    + '<>"NS",'
+                    + total_tabla
+                    + '<>"NA"),1,0),IF('
+                    + texto
+                    + "<>SUM("
+                    + NS
+                    + ","
+                    + NA
+                    + "),1,0)"
+                )
+                formulas = {
+                    "error_cero": "=IF(AND("
+                    + total_tabla
+                    + "=0,OR("
+                    + Total
+                    + ">0,"
+                    + NS
+                    + ">0)),1,0)",
+                    "error_NS": "=IF(OR(AND("
+                    + total_tabla
+                    + '="NS",'
+                    + Total
+                    + ">0),AND("
+                    + total_tabla
+                    + '="NS",'
+                    + NS
+                    + "<2)),1,0)",
+                    "error_NA": "=IF(AND("
+                    + total_tabla
+                    + '="NA",OR('
+                    + Total
+                    + ">0,AND("
+                    + NA
+                    + ">1,"
+                    + NA
+                    + "<"
+                    + aha
+                    + "))),1,0)",
+                    "error_blanco": "=IF(AND("
+                    + blancos
+                    + ">0,"
+                    + blancos
+                    + "<"
+                    + aha
+                    + ","
+                    + total_tabla
+                    + '<>"NA"),1,0)',
+                    "error_suma": "=IF(AND("
+                    + coincide
+                    + "=1,"
+                    + total_tabla
+                    + '<>"NS",'
+                    + total_tabla
+                    + '<>"NA"),1,0)',
+                    "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
+                    "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
+                }
+            alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
+            escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
+            donde = [alt[-1]]
+            CommonUtils.escribirgeneral(donde, escr, hoja)
+            # print('alttttttttttttt', alt)
+    
+            # condi1 =[]
+            # for l in letcol:
+            #     condi1.append(lw(l,freal+(tupla[0]-fila),2))
+    
+            # for colu in condi1[1:]:
+    
+            #     hoja.conditional_formatting.add(colu,
+            #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
+            try:
+                fcon = CommonUtils.condicional(letcol, freal, hoja, fila, tuplas)
+    
+                for i in fcon:
+                    hoja.conditional_formatting.add(
+                        i,
+                        FormulaRule(
+                            formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
+                        ),
+                    )
+                # for i in fcon[1:]:
+                #     hoja.conditional_formatting.add(
+                #         i,
+                #         FormulaRule(
+                #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
+                #         ),
+                #     )
+            except:
+                pass
+            alt1.append(alt)
+            fcon1.append(fcon)
+        if autosuma > 0 and iterar != 164: #164 por tablas de tipos de delito
             c = 0
             for letra in letcol:
                 # autosumanormal([letra], freal, autosuma, hoja)
                 CommonUtils.autosumaportupla(
-                    [letra], freal, autosuma, hoja, tuplas[c], fila
+                    [letra], dfreal, autosuma, hoja, tuplas[c], fila
                 )
                 c += 1
         if men == "si":
-            if autosuma > 0:
+            if autosuma > 0 and iterar != 164:
                 CommonUtils.menerror(freal + 2, autosuma + 2, hoja)
-            if autosuma == 0:
+            if autosuma == 0 and iterar != 164:
                 CommonUtils.menerror(freal + 2, freal + 2, hoja)
-        escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
-        donde = [alt[-1]]
-        CommonUtils.escribirgeneral(donde, escr, hoja)
+        
 
-        return [fcon, alt]
+        return [fcon1[0], alt1[0]]
 
     @staticmethod
     def validarTS(fila, tuplas, freal, autosuma, hoja, letras):
@@ -3387,159 +3413,175 @@ class CommonUtils:
         for i in columnas:
             s = abc1[i]
             letcol.append(s)
-        coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
-
-        val_des = coordss[1]
-        total_tabla = coordss[0]
-
-        fila_res = coordss[0]
-
-        blancos = CommonUtils.parablancos(coordss)
-        aha = str(len(coordss))
-        NS = "COUNTIF(" + fila_res + ',"NS")'
-        texto = "COUNTIF(" + fila_res + ',"=*")'
-        NA = "COUNTIF(" + fila_res + ',"NA")'
-        for i in coordss[1:]:
-
-            NS += "+COUNTIF(" + i + ',"NS")'
-            texto += "+COUNTIF(" + i + ',"=*")'
-            NA += "+COUNTIF(" + i + ',"NA")'
-        for i in coordss[2:]:
-            val_des += "," + i
-
-        Total = "SUM(" + val_des + ")"
-        coincide = (
-            "IF(OR("
-            + Total
-            + "="
-            + total_tabla
-            + ","
-            + total_tabla
-            + '="",AND('
-            + total_tabla
-            + ">0,"
-            + NS
-            + "="
-            + str(len(coordss) - 1)
-            + ")),0,1)"
-        )
-        hay = (
-            "IF(AND("
-            + total_tabla
-            + "=0,"
-            + Total
-            + ">0,"
-            + NS
-            + "=0),1,0),IF(OR(AND("
-            + total_tabla
-            + '="NS",'
-            + Total
-            + ">0),AND("
-            + total_tabla
-            + '="NS",'
-            + NS
-            + "<2)),1,0),=IF(AND("
-            + total_tabla
-            + '="NA",OR('
-            + Total
-            + ">0,"
-            + NS
-            + ">0)),1,0),IF(AND("
-            + blancos
-            + ">0,"
-            + blancos
-            + "<"
-            + aha
-            + ","
-            + total_tabla
-            + '<>"NA"),1,0),IF(AND('
-            + coincide
-            + "=1,"
-            + total_tabla
-            + '<>"NS",'
-            + total_tabla
-            + '<>"NA"),1,0),IF('
-            + texto
-            + "<>SUM("
-            + NS
-            + ","
-            + NA
-            + "),1,0)"
-        )
-        formulas = {
-            "error_cero": "=IF(AND("
-            + total_tabla
-            + "=0,OR("
-            + Total
-            + ">0,"
-            + NS
-            + ">0)),1,0)",
-            "error_NS": "=IF(OR(AND("
-            + total_tabla
-            + '="NS",'
-            + Total
-            + ">0),AND("
-            + total_tabla
-            + '="NS",'
-            + NS
-            + "<2)),1,0)",
-            "error_NA": "=IF(AND("
-            + total_tabla
-            + '="NA",OR('
-            + Total
-            + ">0,"
-            + NS
-            + ">0,AND("
-            + NA
-            + ">1,"
-            + NA
-            + "<"
-            + aha
-            + "))),1,0)",
-            "error_blanco": "=IF(AND("
-            + blancos
-            + ">0,"
-            + blancos
-            + "<"
-            + aha
-            + ","
-            + total_tabla
-            + '<>"NA"),1,0)',
-            "error_suma": "=IF(AND("
-            + coincide
-            + "=1,"
-            + total_tabla
-            + '<>"NS",'
-            + total_tabla
-            + '<>"NA"),1,0)',
-            "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-            "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-        }
-        alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
-        try:
-            fcon = CommonUtils.condicional(letcol, freal, hoja, fila, tuplas)
-            for i in fcon:
-                hoja.conditional_formatting.add(
-                    i,
-                    FormulaRule(
-                        formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
-                    ),
-                )
-            # comentado por que na se valida desde poner gris
-            # for i in fcon[1:]:
-            #     hoja.conditional_formatting.add(
-            #         i,
-            #         FormulaRule(
-            #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
-            #         ),
-            #     )
-        except:
-            pass
-        if autosuma > 0:
+        alt1 = []
+        fcon1 = []
+        iterar = autosuma - freal - 1
+        if iterar > 0:
+            iterar += 1
+        else:
+            iterar = 1
+        final_tabla.extraer([iterar])
+        dfreal = freal + 0
+        for i in range(0,iterar):
+            freal = dfreal + i  
+            coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
+    
+            val_des = coordss[1]
+            total_tabla = coordss[0]
+    
+            fila_res = coordss[0]
+    
+            blancos = CommonUtils.parablancos(coordss)
+            aha = str(len(coordss))
+            NS = "COUNTIF(" + fila_res + ',"NS")'
+            texto = "COUNTIF(" + fila_res + ',"=*")'
+            NA = "COUNTIF(" + fila_res + ',"NA")'
+            for i in coordss[1:]:
+    
+                NS += "+COUNTIF(" + i + ',"NS")'
+                texto += "+COUNTIF(" + i + ',"=*")'
+                NA += "+COUNTIF(" + i + ',"NA")'
+            for i in coordss[2:]:
+                val_des += "," + i
+    
+            Total = "SUM(" + val_des + ")"
+            coincide = (
+                "IF(OR("
+                + Total
+                + "="
+                + total_tabla
+                + ","
+                + total_tabla
+                + '="",AND('
+                + total_tabla
+                + ">0,"
+                + NS
+                + "="
+                + str(len(coordss) - 1)
+                + ")),0,1)"
+            )
+            hay = (
+                "IF(AND("
+                + total_tabla
+                + "=0,"
+                + Total
+                + ">0,"
+                + NS
+                + "=0),1,0),IF(OR(AND("
+                + total_tabla
+                + '="NS",'
+                + Total
+                + ">0),AND("
+                + total_tabla
+                + '="NS",'
+                + NS
+                + "<2)),1,0),=IF(AND("
+                + total_tabla
+                + '="NA",OR('
+                + Total
+                + ">0,"
+                + NS
+                + ">0)),1,0),IF(AND("
+                + blancos
+                + ">0,"
+                + blancos
+                + "<"
+                + aha
+                + ","
+                + total_tabla
+                + '<>"NA"),1,0),IF(AND('
+                + coincide
+                + "=1,"
+                + total_tabla
+                + '<>"NS",'
+                + total_tabla
+                + '<>"NA"),1,0),IF('
+                + texto
+                + "<>SUM("
+                + NS
+                + ","
+                + NA
+                + "),1,0)"
+            )
+            formulas = {
+                "error_cero": "=IF(AND("
+                + total_tabla
+                + "=0,OR("
+                + Total
+                + ">0,"
+                + NS
+                + ">0)),1,0)",
+                "error_NS": "=IF(OR(AND("
+                + total_tabla
+                + '="NS",'
+                + Total
+                + ">0),AND("
+                + total_tabla
+                + '="NS",'
+                + NS
+                + "<2)),1,0)",
+                "error_NA": "=IF(AND("
+                + total_tabla
+                + '="NA",OR('
+                + Total
+                + ">0,"
+                + NS
+                + ">0,AND("
+                + NA
+                + ">1,"
+                + NA
+                + "<"
+                + aha
+                + "))),1,0)",
+                "error_blanco": "=IF(AND("
+                + blancos
+                + ">0,"
+                + blancos
+                + "<"
+                + aha
+                + ","
+                + total_tabla
+                + '<>"NA"),1,0)',
+                "error_suma": "=IF(AND("
+                + coincide
+                + "=1,"
+                + total_tabla
+                + '<>"NS",'
+                + total_tabla
+                + '<>"NA"),1,0)',
+                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
+                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
+            }
+            alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
+            escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
+            donde = [alt[-1]]
+            CommonUtils.escribirgeneral(donde, escr, hoja)
+            try:
+                fcon = CommonUtils.condicional(letcol, freal, hoja, fila, tuplas)
+                for i in fcon:
+                    hoja.conditional_formatting.add(
+                        i,
+                        FormulaRule(
+                            formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
+                        ),
+                    )
+                # comentado por que na se valida desde poner gris
+                # for i in fcon[1:]:
+                #     hoja.conditional_formatting.add(
+                #         i,
+                #         FormulaRule(
+                #             formula=[fcon[0] + '="NA"'], stopIfTrue=True, fill=gris
+                #         ),
+                #     )
+            except:
+                pass
+            alt1.append(alt)
+            fcon1.append(fcon)
+        if autosuma > 0 and iterar != 165:
             c = 0
             for letra in letcol:
                 CommonUtils.autosumaportupla(
-                    [letra], freal, autosuma, hoja, tuplas[c], fila
+                    [letra], dfreal, autosuma, hoja, tuplas[c], fila
                 )
                 # autosumanormal([letra], freal, autosuma, hoja)
                 c += 1
@@ -3552,11 +3594,7 @@ class CommonUtils:
 
         #     hoja.conditional_formatting.add(colu,
         #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
-
-        escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
-        donde = [alt[-1]]
-        CommonUtils.escribirgeneral(donde, escr, hoja)
-        return fcon
+        return fcon1[0]
 
     @staticmethod
     def validarTSD(fila, tuplas, freal, autosuma, hoja, letras, pregunta, codelitos):
@@ -3584,146 +3622,164 @@ class CommonUtils:
         for i in columnas:
             s = abc1[i]
             letcol.append(s)
-        coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
-
-        val_des = coordss[1]
-        total_tabla = coordss[0]
-
-        fila_res = coordss[0]
-
-        blancos = CommonUtils.parablancos(coordss)
-        aha = str(len(coordss))
-        NS = "COUNTIF(" + fila_res + ',"NS")'
-        texto = "COUNTIF(" + fila_res + ',"=*")'
-        NA = "COUNTIF(" + fila_res + ',"NA")'
-        for i in coordss[1:]:
-
-            NS += "+COUNTIF(" + i + ',"NS")'
-            texto += "+COUNTIF(" + i + ',"=*")'
-            NA += "+COUNTIF(" + i + ',"NA")'
-        for i in coordss[2:]:
-            val_des += "," + i
-
-        Total = "SUM(" + val_des + ")"
-        coincide = (
-            "IF(OR("
-            + Total
-            + "="
-            + total_tabla
-            + ","
-            + total_tabla
-            + '="",AND('
-            + total_tabla
-            + ">0,"
-            + NS
-            + "="
-            + str(len(coordss) - 1)
-            + ")),0,1)"
-        )
-        hay = (
-            "IF(AND("
-            + total_tabla
-            + "=0,"
-            + Total
-            + ">0,"
-            + NS
-            + "=0),1,0),IF(OR(AND("
-            + total_tabla
-            + '="NS",'
-            + Total
-            + ">0),AND("
-            + total_tabla
-            + '="NS",'
-            + NS
-            + "<2)),1,0),=IF(AND("
-            + total_tabla
-            + '="NA",OR('
-            + Total
-            + ">0,"
-            + NS
-            + ">0)),1,0),IF(AND("
-            + blancos
-            + ">0,"
-            + blancos
-            + "<"
-            + aha
-            + ","
-            + total_tabla
-            + '<>"NA"),1,0),IF(AND('
-            + coincide
-            + "=1,"
-            + total_tabla
-            + '<>"NS",'
-            + total_tabla
-            + '<>"NA"),1,0),IF('
-            + texto
-            + "<>SUM("
-            + NS
-            + ","
-            + NA
-            + "),1,0)"
-        )
-        formulas = {
-            "error_cero": "=IF(AND("
-            + total_tabla
-            + "=0,OR("
-            + Total
-            + ">0,"
-            + NS
-            + ">0)),1,0)",
-            "error_NS": "=IF(OR(AND("
-            + total_tabla
-            + '="NS",'
-            + Total
-            + ">0),AND("
-            + total_tabla
-            + '="NS",'
-            + NS
-            + "<2)),1,0)",
-            "error_NA": "=IF(AND("
-            + total_tabla
-            + '="NA",OR('
-            + Total
-            + ">0,"
-            + NS
-            + ">0,AND("
-            + NA
-            + ">1,"
-            + NA
-            + "<"
-            + aha
-            + "))),1,0)",
-            "error_blanco": "=IF(AND("
-            + blancos
-            + ">0,"
-            + blancos
-            + "<"
-            + aha
-            + ","
-            + total_tabla
-            + '<>"NA"),1,0)',
-            "error_suma": "=IF(AND("
-            + coincide
-            + "=1,"
-            + total_tabla
-            + '<>"NS",'
-            + total_tabla
-            + '<>"NA"),1,0)',
-            "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-            "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-        }
-        alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
-        try:
-            fcon = CommonUtils.condicional(letcol, freal, hoja, fila, copia_tuplas)
-            for i in fcon:
-                hoja.conditional_formatting.add(
-                    i,
-                    FormulaRule(
-                        formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
-                    ),
-                )
-        except:
-            pass
+        alt1 = []
+        fcon1 = []
+        iterar = autosuma - freal - 1
+        if iterar > 0:
+            iterar += 1
+        else:
+            iterar = 1
+        
+        dfreal = freal + 0
+        for i in range(0,iterar):
+            freal = dfreal + i 
+            coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
+    
+            val_des = coordss[1]
+            total_tabla = coordss[0]
+    
+            fila_res = coordss[0]
+    
+            blancos = CommonUtils.parablancos(coordss)
+            aha = str(len(coordss))
+            NS = "COUNTIF(" + fila_res + ',"NS")'
+            texto = "COUNTIF(" + fila_res + ',"=*")'
+            NA = "COUNTIF(" + fila_res + ',"NA")'
+            for i in coordss[1:]:
+    
+                NS += "+COUNTIF(" + i + ',"NS")'
+                texto += "+COUNTIF(" + i + ',"=*")'
+                NA += "+COUNTIF(" + i + ',"NA")'
+            for i in coordss[2:]:
+                val_des += "," + i
+    
+            Total = "SUM(" + val_des + ")"
+            coincide = (
+                "IF(OR("
+                + Total
+                + "="
+                + total_tabla
+                + ","
+                + total_tabla
+                + '="",AND('
+                + total_tabla
+                + ">0,"
+                + NS
+                + "="
+                + str(len(coordss) - 1)
+                + ")),0,1)"
+            )
+            hay = (
+                "IF(AND("
+                + total_tabla
+                + "=0,"
+                + Total
+                + ">0,"
+                + NS
+                + "=0),1,0),IF(OR(AND("
+                + total_tabla
+                + '="NS",'
+                + Total
+                + ">0),AND("
+                + total_tabla
+                + '="NS",'
+                + NS
+                + "<2)),1,0),=IF(AND("
+                + total_tabla
+                + '="NA",OR('
+                + Total
+                + ">0,"
+                + NS
+                + ">0)),1,0),IF(AND("
+                + blancos
+                + ">0,"
+                + blancos
+                + "<"
+                + aha
+                + ","
+                + total_tabla
+                + '<>"NA"),1,0),IF(AND('
+                + coincide
+                + "=1,"
+                + total_tabla
+                + '<>"NS",'
+                + total_tabla
+                + '<>"NA"),1,0),IF('
+                + texto
+                + "<>SUM("
+                + NS
+                + ","
+                + NA
+                + "),1,0)"
+            )
+            formulas = {
+                "error_cero": "=IF(AND("
+                + total_tabla
+                + "=0,OR("
+                + Total
+                + ">0,"
+                + NS
+                + ">0)),1,0)",
+                "error_NS": "=IF(OR(AND("
+                + total_tabla
+                + '="NS",'
+                + Total
+                + ">0),AND("
+                + total_tabla
+                + '="NS",'
+                + NS
+                + "<2)),1,0)",
+                "error_NA": "=IF(AND("
+                + total_tabla
+                + '="NA",OR('
+                + Total
+                + ">0,"
+                + NS
+                + ">0,AND("
+                + NA
+                + ">1,"
+                + NA
+                + "<"
+                + aha
+                + "))),1,0)",
+                "error_blanco": "=IF(AND("
+                + blancos
+                + ">0,"
+                + blancos
+                + "<"
+                + aha
+                + ","
+                + total_tabla
+                + '<>"NA"),1,0)',
+                "error_suma": "=IF(AND("
+                + coincide
+                + "=1,"
+                + total_tabla
+                + '<>"NS",'
+                + total_tabla
+                + '<>"NA"),1,0)',
+                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
+                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
+            }
+            alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
+            escr = [
+                "=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"
+            ]  # estas lineas son para formula de hay
+            donde = [alt[-1]]
+            CommonUtils.escribirgeneral(donde, escr, hoja)
+            try:
+                fcon = CommonUtils.condicional(letcol, freal, hoja, fila, copia_tuplas)
+                for i in fcon:
+                    hoja.conditional_formatting.add(
+                        i,
+                        FormulaRule(
+                            formula=[alt[-1] + "=1"], stopIfTrue=True, fill=redFill
+                        ),
+                    )
+            except:
+                pass
+            alt1.append(alt)
+            fcon1.append(fcon)
         if autosuma > 0:
             c = 0
             for letra in letcol:
@@ -3757,17 +3813,25 @@ class CommonUtils:
             []
         )  # columnas ara condicionales, son 3 y ya va con fila real (Son las de la validación de la derecha de las tablas)
         for i in az:
-            tr = i + str(freal + 1)
+            tr = i + str(dfreal + 1)
             todo.append(tr)
-            tr1 = i + str(freal + 2)
+            tr1 = i + str(dfreal + 2)
             condi.append(tr1)
         CommonUtils.escribirgeneral(todo, formulas, hoja)
         x_valida.extraer(condi)
         condi1 = []  # lista de letras que tienen los numeros de la fila
+        condi2 = []
         c = 0
         for l in letcol:
-            condi1.append(CommonUtils.lw(l, freal + (tuplas[c][0] - fila - 1) + 2, 2))
+            condi1.append(CommonUtils.lw(l, dfreal + (tuplas[c][0] - fila - 1) + 2, 2))
+            condi2.append(CommonUtils.lw(l,dfreal+(tuplas[c][0]-fila-1)+166,2))
             c += 1
+        condi3 = []
+        c = 0
+        for letra in condi1:
+            condi3.append(letra+':'+condi2[c])
+            c += 1
+        condi1 = condi3
         hoja.conditional_formatting.add(
             condi1[0],
             FormulaRule(formula=[condi[0] + "=1"], stopIfTrue=True, fill=redFill),
@@ -3856,13 +3920,9 @@ class CommonUtils:
             escr = ["=IF(" + ar1 + "/" + b + ">0.25,1,0)"]
             CommonUtils.escribirgeneral(pri, escr, hoja)
             ya += 1
-        escr = [
-            "=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"
-        ]  # estas lineas son para formula de hay
-        donde = [alt[-1]]
-        CommonUtils.escribirgeneral(donde, escr, hoja)
+        
 
-        return fcon
+        return fcon1[0]
 
     @staticmethod
     def menerror(fila_inicio, fila_suma, hoja):
@@ -4102,15 +4162,19 @@ class CommonUtils:
         y = []
         con = 0
         for i in formulas:
-            filas = [fila - 1, fila]
-            datos = [i, formulas[i]]
-            c = 0
+            filas = [fila-1,fila]
+            datos = [i,formulas[i]]
+            c = 0        
             for fila in filas:
-                letr = letras[con] + str(fila)
-                hoja[letr] = datos[c]
-                y.append(letr)
-                c += 1
-            con += 1
+                letr = letras[con]+str(fila)
+                if fila == filas[0]:
+                    y.append(letr)
+                   
+                else:  
+                    hoja[letr] =datos[c] 
+                    y.append(letr)
+                c+=1
+            con+=1
         return y
 
     @staticmethod
