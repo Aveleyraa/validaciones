@@ -6,7 +6,7 @@ Created on Wed Nov  3 11:07:44 2021
 """
 
 from services.catalogos import validar_catalogo
-from utility.common_utils import CommonUtils, x_valida,final_tabla
+from utility.common_utils import CommonUtils, x_valida,final_tabla,frame
 
 
 def procesarcoor(hopan, hoja):  # funcion principal!!
@@ -25,6 +25,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
 
         pregunta = pro[con]  # aqui va fila inicio de la pregunta para iterar
         nter = hopan.iat[pregunta, 0]
+        frame.agregar_valor_acolumna(nter,'pregunta')
         r = CommonUtils.analizarcor(con, hopan, pro)
         totales = CommonUtils.paratotales(con, hopan, pro)
         part_tab = r[7]
@@ -332,6 +333,10 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
 
         print("Todo bien con pregunta ", nter)
         con += 1
+        frame.conjuntar_db()
+        frame.ajustar_db()
+    frame.crear_df()
+    frame.guardar()
 
     return
 

@@ -6,7 +6,9 @@ from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
-from extractor import Extractor
+from extractor import Extractor, Datos
+
+frame = Datos('preguntasytotales')
 
 x_valida = Extractor()
 
@@ -1863,6 +1865,7 @@ class CommonUtils:
             "hay error fila",
         ]
         preg = []
+        agrega = []
         for i in coordenadas:
             letcol = []
             for cor in i:
@@ -1872,8 +1875,10 @@ class CommonUtils:
                 letra = abc1[b]
                 co = letra + str(fila)
                 letcol.append(co)
+                agrega.append(co)
             preg.append(letcol)
         con = 0
+        frame.agregar_valor_acolumna(agrega,'totales')
         
         for p in preg:
             if len(preg) == 0:
@@ -1903,58 +1908,20 @@ class CommonUtils:
             )
             blancos = CommonUtils.parablancos(coordss)
             aha = str(len(coordss))
-
+            hay='AF'+c1+':AK'+c1
             texto = "COUNTIF(" + fila_res + ',"=*")'
             NA = "COUNTIF(" + fila_res + ',"NA")'
-            formulas = {
-                "error_cero": "=IF(AND("
-                + total_tabla
-                + "=0,OR("
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0)",
-                "error_NS": "=IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0)",
-                "error_NA": "=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0,AND("
-                + NA
-                + ">1,"
-                + NA
-                + "<"
-                + aha
-                + "))),1,0)",
-                "error_blanco": "=IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_suma": "=IF(AND("
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                "hay error fila": "=IF(SUM(AF" + c1 + ":AK" + c1 + ")>0,1,0)",
-            }
+            formulas = CommonUtils.formula_aritmetica(
+                total_tabla,
+                Total,
+                NS,
+                NA,
+                blancos,
+                aha,
+                coincide,
+                hay,
+                texto
+                )
             donde = []
             for i in w:
                 y = i + c1
@@ -2794,6 +2761,7 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
+        frame.agregar_valor_acolumna(donde,'totales')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -2830,6 +2798,7 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
+        frame.agregar_valor_acolumna(donde,'totales')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -3029,7 +2998,7 @@ class CommonUtils:
             + CommonUtils.lw(L, inicio, 164)
             + "))"
         ]
-
+        frame.agregar_valor_acolumna(donde,'totales')
         CommonUtils.escribirgeneral(donde, que, hoja)
 
         return
@@ -3064,6 +3033,28 @@ class CommonUtils:
         return v
 
     @staticmethod
+    def formula_aritmetica(
+        total_tabla,
+        Total,
+        NS,
+        NA,
+        blancos,
+        aha,
+        coincide,
+        hay,
+        texto):
+        formula = {
+            'error_cero':'=IF(AND('+total_tabla+'=0,OR('+Total+'>0,'+NS+'>0)),1,0)',
+            'error_NS':'=IF(OR(AND('+total_tabla+'="NS",'+Total+'>0),AND('+total_tabla+'="NS",'+NS+'<2)),1,0)',
+            'error_NA':'=IF(AND('+total_tabla+'="NA",OR('+Total+'>0,'+NS+'>0,AND('+NA+'>1,'+NA+'<'+aha+'))),1,0)',
+            'error_blanco':'=IF(AND('+blancos+'>0,'+blancos+'<'+aha+','+total_tabla+'<>"NA"),1,0)',
+            'error_suma':'=IF(AND('+coincide+'=1,'+total_tabla+'<>"NS",'+total_tabla+'<>"NA"),1,0)',
+            'error_valor':'=IF('+texto+'<>SUM('+NS+','+NA+'),1,0)',
+            'hay error fila':'=IF(SUM('+hay+')>0,1,0)'
+            }
+        return formula
+
+    @staticmethod
     def variables(fila, tuplas, freal, autosuma, hoja, part_tab, letras, men):
         "part tab es si la tabla está en partes, men es si o no, y es para el mensaje de errores debido al proceso extrerno si hay totales o subtotales en las tablas"
         print("argumentos de entrada funcion variable", fila, tuplas, freal, autosuma)
@@ -3086,10 +3077,12 @@ class CommonUtils:
             iterar = 1
         final_tabla.extraer([iterar])
         dfreal = freal + 0
+        chek = []
         for i in range(0,iterar):
             freal = dfreal + i
             coordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
             ccoordss = CommonUtils.crearcoordenada1(letcol, tuplas, fila, freal)
+            chek.append(coordss)
             if part_tab == 0:
                 val_des = coordss[1] + ":" + coordss[-1]
                 total_tabla = coordss[0]
@@ -3158,55 +3151,17 @@ class CommonUtils:
                     + NA
                     + "),1,0)"
                 )
-                formulas = {
-                    "error_cero": "=IF(AND("
-                    + total_tabla
-                    + "=0,OR("
-                    + Total
-                    + ">0,"
-                    + NS
-                    + ">0)),1,0)",
-                    "error_NS": "=IF(OR(AND("
-                    + total_tabla
-                    + '="NS",'
-                    + Total
-                    + ">0),AND("
-                    + total_tabla
-                    + '="NS",'
-                    + NS
-                    + "<2)),1,0)",
-                    "error_NA": "=IF(AND("
-                    + total_tabla
-                    + '="NA",OR('
-                    + Total
-                    + ">0,"
-                    + NS
-                    + ">0,AND("
-                    + NA
-                    + ">1,"
-                    + NA
-                    + "<"
-                    + aha
-                    + "))),1,0)",
-                    "error_blanco": "=IF(AND("
-                    + blancos
-                    + ">0,"
-                    + blancos
-                    + "<"
-                    + aha
-                    + ","
-                    + total_tabla
-                    + '<>"NA"),1,0)',
-                    "error_suma": "=IF(AND("
-                    + coincide
-                    + "=1,"
-                    + total_tabla
-                    + '<>"NS",'
-                    + total_tabla
-                    + '<>"NA"),1,0)',
-                    "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                    "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-                }
+                formulas = CommonUtils.formula_aritmetica(
+                    total_tabla,
+                    Total,
+                    NS,
+                    NA,
+                    blancos,
+                    aha,
+                    coincide,
+                    hay,
+                    texto
+                    )
             else:
                 print("tuplas de tabla en partes: ", part_tab)
                 aderir = []
@@ -3300,53 +3255,17 @@ class CommonUtils:
                     + NA
                     + "),1,0)"
                 )
-                formulas = {
-                    "error_cero": "=IF(AND("
-                    + total_tabla
-                    + "=0,OR("
-                    + Total
-                    + ">0,"
-                    + NS
-                    + ">0)),1,0)",
-                    "error_NS": "=IF(OR(AND("
-                    + total_tabla
-                    + '="NS",'
-                    + Total
-                    + ">0),AND("
-                    + total_tabla
-                    + '="NS",'
-                    + NS
-                    + "<2)),1,0)",
-                    "error_NA": "=IF(AND("
-                    + total_tabla
-                    + '="NA",OR('
-                    + Total
-                    + ">0,AND("
-                    + NA
-                    + ">1,"
-                    + NA
-                    + "<"
-                    + aha
-                    + "))),1,0)",
-                    "error_blanco": "=IF(AND("
-                    + blancos
-                    + ">0,"
-                    + blancos
-                    + "<"
-                    + aha
-                    + ","
-                    + total_tabla
-                    + '<>"NA"),1,0)',
-                    "error_suma": "=IF(AND("
-                    + coincide
-                    + "=1,"
-                    + total_tabla
-                    + '<>"NS",'
-                    + total_tabla
-                    + '<>"NA"),1,0)',
-                    "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                    "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-                }
+                formulas = CommonUtils.formula_aritmetica(
+                    total_tabla,
+                    Total,
+                    NS,
+                    NA,
+                    blancos,
+                    aha,
+                    coincide,
+                    hay,
+                    texto
+                    )
             alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
             escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
             donde = [alt[-1]]
@@ -3395,7 +3314,8 @@ class CommonUtils:
                 CommonUtils.menerror(freal + 2, autosuma + 2, hoja)
             if autosuma == 0 and iterar != 164:
                 CommonUtils.menerror(freal + 2, freal + 2, hoja)
-        
+        if autosuma == 0:
+            frame.agregar_valor_acolumna(chek,'totales')
 
         return [fcon1[0], alt1[0]]
 
@@ -3503,55 +3423,17 @@ class CommonUtils:
                 + NA
                 + "),1,0)"
             )
-            formulas = {
-                "error_cero": "=IF(AND("
-                + total_tabla
-                + "=0,OR("
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0)",
-                "error_NS": "=IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0)",
-                "error_NA": "=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0,AND("
-                + NA
-                + ">1,"
-                + NA
-                + "<"
-                + aha
-                + "))),1,0)",
-                "error_blanco": "=IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_suma": "=IF(AND("
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-            }
+            formulas = CommonUtils.formula_aritmetica(
+                total_tabla,
+                Total,
+                NS,
+                NA,
+                blancos,
+                aha,
+                coincide,
+                hay,
+                texto
+                )
             alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
             escr = ["=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"]
             donde = [alt[-1]]
@@ -3712,55 +3594,17 @@ class CommonUtils:
                 + NA
                 + "),1,0)"
             )
-            formulas = {
-                "error_cero": "=IF(AND("
-                + total_tabla
-                + "=0,OR("
-                + Total
-                + ">0,"
-                + NS
-                + ">0)),1,0)",
-                "error_NS": "=IF(OR(AND("
-                + total_tabla
-                + '="NS",'
-                + Total
-                + ">0),AND("
-                + total_tabla
-                + '="NS",'
-                + NS
-                + "<2)),1,0)",
-                "error_NA": "=IF(AND("
-                + total_tabla
-                + '="NA",OR('
-                + Total
-                + ">0,"
-                + NS
-                + ">0,AND("
-                + NA
-                + ">1,"
-                + NA
-                + "<"
-                + aha
-                + "))),1,0)",
-                "error_blanco": "=IF(AND("
-                + blancos
-                + ">0,"
-                + blancos
-                + "<"
-                + aha
-                + ","
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_suma": "=IF(AND("
-                + coincide
-                + "=1,"
-                + total_tabla
-                + '<>"NS",'
-                + total_tabla
-                + '<>"NA"),1,0)',
-                "error_valor": "=IF(" + texto + "<>SUM(" + NS + "," + NA + "),1,0)",
-                "hay error fila": "=IF(SUM(" + hay + ")>0,1,0)",
-            }
+            formulas = CommonUtils.formula_aritmetica(
+                total_tabla,
+                Total,
+                NS,
+                NA,
+                blancos,
+                aha,
+                coincide,
+                hay,
+                texto
+                )
             alt = CommonUtils.escribir(freal + 2, formulas, hoja, letras)
             escr = [
                 "=IF(SUM(" + alt[1] + ":" + alt[-3] + ")>0,1,0)"
