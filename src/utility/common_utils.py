@@ -6,7 +6,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
-from extractor import Extractor, Datos
+from utility.extractor import Extractor, Datos
 
 frame = Datos('preguntasytotales')
 

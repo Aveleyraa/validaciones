@@ -3,20 +3,13 @@ import openpyxl as op
 from tkinter import filedialog
 import tkinter as tk
 import sys
-<<<<<<< HEAD
-import os
-#sys.path.insert(0,'D:\OneDrive - INEGI\Documents\proyecto_validaciones') 
+import os 
 from services.principal_doc import procesarcoor
-=======
-sys.path.append('D:\Trabajo\Documentos\codigos_python\algoritmo_penitenciario2022')
-from services.principal_doc import procesarcoor, p_especificas
->>>>>>> 3bd840a1df20cd4c40ff149f728647d4a622e84f
 
 root= tk.Tk()
  
 canvas1 = tk.Canvas(root, width = 800, height = 300)
 canvas1.pack()
-#imagen = tk.PhotoImage(file="D:\OneDrive - INEGI\Documents\proyecto_validaciones\mock\INEGI.png")
 label1 = tk.Label(root, text='Importar Censo para validar' )
 label1.config(font=('Arial', 20))
 label1.place(x = 50, y = 0)

@@ -333,15 +333,11 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
 
         print("Todo bien con pregunta ", nter)
         con += 1
-<<<<<<< HEAD
-    print("Proceso con exito!")
-=======
         frame.conjuntar_db()
         frame.ajustar_db()
     frame.crear_df()
     frame.guardar()
 
->>>>>>> 3bd840a1df20cd4c40ff149f728647d4a622e84f
     return
 
 
