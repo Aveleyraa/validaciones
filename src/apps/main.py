@@ -1,9 +1,21 @@
 import pandas as pd
 import openpyxl as op
 from tkinter import filedialog
+import tkinter as tk
 import sys
-sys.path.append('D:\OneDrive - INEGI\Documents\proyecto_validaciones\src')
+import os
+#sys.path.insert(0,'D:\OneDrive - INEGI\Documents\proyecto_validaciones') 
 from services.principal_doc import procesarcoor
+
+root= tk.Tk()
+ 
+canvas1 = tk.Canvas(root, width = 800, height = 300)
+canvas1.pack()
+#imagen = tk.PhotoImage(file="D:\OneDrive - INEGI\Documents\proyecto_validaciones\mock\INEGI.png")
+label1 = tk.Label(root, text='Importar Censo para validar' )
+label1.config(font=('Arial', 20))
+label1.place(x = 50, y = 0)
+canvas1.create_window(400, 50, window=label1)
 
 
 def main():
@@ -49,10 +61,20 @@ def main():
         shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
         procesarcoor(shet, shi)
     
-    nombre_archivo_salvado = "{}_ver1.xlsx".format(modulo)
+    nombre_archivo_salvado = "0{}_CNSIPEF_2022_M{}_validado.xlsx".format(modulo,modulo)
     directory = filedialog.askdirectory()
     book.save(directory + '/' + nombre_archivo_salvado)
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
+
+
+browseButton_Excel = tk.Button(text='Cargar archivo...', command=main, bg='green', fg='white', font=('helvetica', 12, 'bold'))
+canvas1.create_window(400, 180, window=browseButton_Excel)
+ 
+
+button3 = tk.Button (root, text='Salir', command=root.destroy, bg='green', font=('helvetica', 11, 'bold'))
+canvas1.create_window(400, 260, window=button3)
+ 
+root.mainloop()
