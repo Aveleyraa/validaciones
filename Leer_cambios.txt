@@ -1,0 +1,42 @@
+Lista de cambios en el algortimo:
+
+
+1.- El principal es que ya hay validaciones en toda la tabla de las preguntas que implican una validación;
+Esto es para tablas con elementos de listas desplegables y restricciones de valor, y para tablas que tienen 
+totales, subtotales y sus desagregados.
+
+1.1.- Existen problemas de precisión al poner elementos de listas desplegables y restricciones de valor
+debido a que en tablas con celdas combinadas el cálculo suele ser complicado de distinguir para meter 
+condicionales y cosas así. La falta de precisión suele ser de una fila nada más, por lo que
+no suele distinguirse en realidad.
+
+1.2.- Me preocupa que al generar los archivos con validaciones y condicionales en toda la tabla
+el tamaño de ellos sea muy grande. Esto por algo que comentó Nancy en la presentación del 
+algortimo. Ella dijo que no tenía permitido exceder cierto tamaño en sus archivos. Sé que no es nuestro caso, 
+pero no sé si a futuro podría serlo. 
+
+1.3.- Otra consideración para hacer los manuales con el algoritmo que valida toda la tabla, es que solo se hace
+cuando la tabla concluye con una autosuma. Hay tablas que no terminan así, y esas solo tienen validación
+en la primera fila, al igual que sus elementos condicionales (tablas que requieren de validaciones aritméticas). 
+
+
+2.- Se ha creado una función para homologar la creación de formulas de validación (los tipos de
+errores para totales y sus desagregados). De tal forma que con ello es más sencillo editar
+las formulas para excel.
+
+
+3.- Se hace un primer acercamiento a la creación de un archivo/dataframe de pandas que será una pieza
+clave cuando trabajemos la parte de relación entre preguntas. Este archivo se genera en formato csv
+y contiene tres columnas: la primera es el índice que agrega pandas por defecto, la segunda columna se llama 
+pregunta y tiene el numero de pregunta del módulo, la tercera se llama totales y contiene las coordenadas
+estilo excel de donde se detectó, hay totales en las preguntas. Como lo mencioné, es un primer acercamiento ya 
+que necesita de varias precisiones, pues obtiene únicamente los totales de tablas que tienen autosumas
+y de las preguntas que no son tablas, pero que contienen un total y sus desagregados. En ese sentido,
+hay preguntas como ésta última, que solo tienen tres totales, por ejemplo, pero sin desagregados, entonces 
+esas no las detecta, debido a que tales elementos no tienen un proceso de validacion como tal en el algortimo.
+
+------Nota: El desarrollo de estos cambios lo hice sin la versión actual del proyecto. Me quedé con la que tenía en mi branch
+debido a que se han quedado con el equipo en el que estaba trabajando por el tema de la renovación de contrato. De cualquier forma,
+los cambios en el archivo main.py son solo para poder validar todas las pestañas de secciones para cualquer censo, no solo
+el de penitenciario. 
+ 
