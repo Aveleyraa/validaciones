@@ -3,9 +3,14 @@ import openpyxl as op
 from tkinter import filedialog
 import tkinter as tk
 import sys
+<<<<<<< HEAD
 import os
 #sys.path.insert(0,'D:\OneDrive - INEGI\Documents\proyecto_validaciones') 
 from services.principal_doc import procesarcoor
+=======
+sys.path.append('D:\Trabajo\Documentos\codigos_python\algoritmo_penitenciario2022')
+from services.principal_doc import procesarcoor, p_especificas
+>>>>>>> 3bd840a1df20cd4c40ff149f728647d4a622e84f
 
 root= tk.Tk()
  
@@ -42,12 +47,12 @@ def main():
     p = book.sheetnames
     print(p)
 
-    if modulo == 1:
-        pags = p[4:13]
-
-    if modulo == 2:
-        pags = p[4:8]  # modulo 2
-    print(pags)
+    para_pags = ['Secc']
+    pags = []
+    for val in para_pags:
+        pags1 = [pag for pag in p if val in pag]
+        pags += pags1
+    print(pags)  
     """
     Antes de correr el ciclo, asegurarse de que pags tenga todas las hojas
     en las que se van a escribir validaciones con este método.
