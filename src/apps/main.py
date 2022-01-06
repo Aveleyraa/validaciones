@@ -1,6 +1,6 @@
 import pandas as pd
 import openpyxl as op
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import tkinter as tk
 import sys
 import os 
@@ -62,6 +62,7 @@ def main():
     nombre_archivo_salvado = "0{}_CNSIPEF_2022_M{}_validado.xlsx".format(modulo,modulo)
     directory = filedialog.askdirectory()
     book.save(directory + '/' + nombre_archivo_salvado)
+    messagebox.showinfo('Aviso', 'Se ha terminado la validación del censo!')
 
 
 #if __name__ == "__main__":
