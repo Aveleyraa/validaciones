@@ -4,14 +4,15 @@ Created on Mon Nov 22 10:53:17 2021
 
 @author: AARON.RAMIREZ
 """
+from sys import path
 from openpyxl.worksheet.datavalidation import DataValidation
 import pandas as pd
 import string
+import os
 
+a=os.path.split(os.getcwd())[0]
 
-catalogos = pd.read_csv(
-    r"D:\Trabajo\Documentos\codigos_python\algoritmo_penitenciario2022\base_catalogos.csv"
-)
+catalogos = pd.read_csv("{}/mock/base_catalogos.csv".format(a))
 
 
 def validar_catalogo(pregunta,dic,hoja):

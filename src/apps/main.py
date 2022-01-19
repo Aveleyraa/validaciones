@@ -1,9 +1,19 @@
 import pandas as pd
 import openpyxl as op
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
+import tkinter as tk
 import sys
-sys.path.append('D:\Trabajo\Documentos\codigos_python\algoritmo_penitenciario2022')
-from services.principal_doc import procesarcoor, p_especificas
+import os 
+from services.principal_doc import procesarcoor
+
+root= tk.Tk()
+ 
+canvas1 = tk.Canvas(root, width = 800, height = 300)
+canvas1.pack()
+label1 = tk.Label(root, text='Importar Censo para validar' )
+label1.config(font=('Arial', 20))
+label1.place(x = 50, y = 0)
+canvas1.create_window(400, 50, window=label1)
 
 
 def main():
@@ -21,7 +31,7 @@ def main():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 1
+    modulo = 2
 
     libro = import_file_path
 
@@ -48,9 +58,22 @@ def main():
         shi = book[pagina]
         shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
         procesarcoor(shet, shi)
+    
+    nombre_archivo_salvado = "0{}_CNSIPEF_2022_M{}_validado.xlsx".format(modulo,modulo)
+    directory = filedialog.askdirectory()
+    book.save(directory + '/' + nombre_archivo_salvado)
+    messagebox.showinfo('Aviso', 'Se ha terminado la validación del censo!')
 
-    book.save("{}_ver1.xlsx".format(modulo))
+
+#if __name__ == "__main__":
+#    main()
 
 
-if __name__ == "__main__":
-    main()
+browseButton_Excel = tk.Button(text='Cargar archivo...', command=main, bg='green', fg='white', font=('helvetica', 12, 'bold'))
+canvas1.create_window(400, 180, window=browseButton_Excel)
+ 
+
+button3 = tk.Button (root, text='Salir', command=root.destroy, bg='green', font=('helvetica', 11, 'bold'))
+canvas1.create_window(400, 260, window=button3)
+ 
+root.mainloop()
