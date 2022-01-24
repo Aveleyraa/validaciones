@@ -8,7 +8,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
 from utility.extractor import Extractor, Datos
 
-frame = Datos('preguntasytotales')
+frame = Datos('preguntas_relacionadas')
 
 x_valida = Extractor()
 
@@ -1878,7 +1878,8 @@ class CommonUtils:
                 agrega.append(co)
             preg.append(letcol)
         con = 0
-        frame.agregar_valor_acolumna(agrega,'totales')
+        agrega = ','.join(agrega)
+        frame.agregar_valor_acolumna(agrega,'coordenada')
         
         for p in preg:
             if len(preg) == 0:
@@ -2761,7 +2762,8 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -2798,7 +2800,8 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -2998,7 +3001,8 @@ class CommonUtils:
             + CommonUtils.lw(L, inicio, 164)
             + "))"
         ]
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         CommonUtils.escribirgeneral(donde, que, hoja)
 
         return
@@ -3315,7 +3319,14 @@ class CommonUtils:
             if autosuma == 0 and iterar != 164:
                 CommonUtils.menerror(freal + 2, freal + 2, hoja)
         if autosuma == 0:
-            frame.agregar_valor_acolumna(chek,'totales')
+            if type(chek[0]) == list:
+                nchek = []
+                for c in chek:
+                    nchek += c
+                chek = nchek
+            dn = ','.join(chek)
+            
+            frame.agregar_valor_acolumna(dn,'coordenada')
 
         return [fcon1[0], alt1[0]]
 
@@ -3467,7 +3478,9 @@ class CommonUtils:
                 )
                 # autosumanormal([letra], freal, autosuma, hoja)
                 c += 1
-
+        if autosuma == 0:
+            dn = ','.join(fcon1[0])
+            frame.agregar_valor_acolumna(dn,'coordenada')
         # condi1 =[]
         # for l in letcol:
         #     condi1.append(lw(l,freal+(tupla[0]-fila),2))

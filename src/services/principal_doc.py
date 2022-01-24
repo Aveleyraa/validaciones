@@ -9,7 +9,7 @@ from services.catalogos import validar_catalogo
 from utility.common_utils import CommonUtils, x_valida,final_tabla,frame
 
 
-def procesarcoor(hopan, hoja):  # funcion principal!!
+def procesarcoor(hopan, hoja, seccion):  # funcion principal!!
     """
     hopan: dataframe de pandas
     hoja: hoja de excel de openpyxl
@@ -26,6 +26,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
         pregunta = pro[con]  # aqui va fila inicio de la pregunta para iterar
         nter = hopan.iat[pregunta, 0]
         frame.agregar_valor_acolumna(nter,'pregunta')
+        frame.agregar_valor_acolumna(seccion,'seccion')
         r = CommonUtils.analizarcor(con, hopan, pro)
         totales = CommonUtils.paratotales(con, hopan, pro)
         part_tab = r[7]
@@ -131,13 +132,22 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
                         c1 += 1
 
                 if fin[c] + pregunta == 0:
-                    CommonUtils.menerrorsub(
-                        freal + 2,
-                        a["final"][0] + 2 + pregunta,
-                        hoja,
-                        extraer_letras,
-                        r[9] + pregunta,
-                    )
+                    try:
+                        CommonUtils.menerrorsub(
+                            freal + 2,
+                            a["final"][0] + 2 + pregunta,
+                            hoja,
+                            extraer_letras,
+                            r[9] + pregunta,
+                        )
+                    except:
+                        CommonUtils.menerrorsub(
+                            freal + 2,
+                            4 + 2 + pregunta,
+                            hoja,
+                            extraer_letras,
+                            r[9] + pregunta,
+                        )#correccion especial para pregunta 1.54 de CNIJF 2022
                 if fin[c] + pregunta != 0:
                     CommonUtils.menerrorsub(
                         freal + 2,
@@ -308,6 +318,8 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
         if r[0] == 3:
             diccio = r[8]
             tuplas = diccio["tuplas"]
+            if r[3]:
+                diccio['tuplas'] = r[3]
             ad = CommonUtils.masdeunatablauni(tuplas)
             fin = r[6]
 
@@ -335,8 +347,7 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
         con += 1
         frame.conjuntar_db()
         frame.ajustar_db()
-    frame.crear_df()
-    frame.guardar()
+    
 
     return
 

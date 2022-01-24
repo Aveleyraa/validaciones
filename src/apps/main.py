@@ -4,7 +4,7 @@ from tkinter import filedialog, messagebox
 import tkinter as tk
 import sys
 import os 
-from services.principal_doc import procesarcoor
+from services.principal_doc import procesarcoor, frame
 
 root= tk.Tk()
  
@@ -57,7 +57,9 @@ def main():
 
         shi = book[pagina]
         shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
-        procesarcoor(shet, shi)
+        procesarcoor(shet, shi, pagina)
+    frame.crear_df()
+    frame.guardar()
     
     nombre_archivo_salvado = "0{}_CNSIPEF_2022_M{}_validado.xlsx".format(modulo,modulo)
     directory = filedialog.askdirectory()
