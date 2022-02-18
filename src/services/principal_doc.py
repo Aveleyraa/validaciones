@@ -159,13 +159,28 @@ def procesarcoor(hopan, hoja, seccion):  # funcion principal!!
                 c += 1
         if r[1] != 0 and r[0] == 1:  # tablas de filas unicas
             ad = CommonUtils.masdeunatablauni(r[1])
-            for i in ad:
+            for i in ad[0:1]:
 
                 freal = (
                     pregunta + i + 1
                 )  # mas uno porque es la fila del titulo de columnas
                 r[1].sort()
-                tuplas = CommonUtils.subtuplas(totales, r[1], part_tab,r[8])
+                tup15 = r[8]['tuplas']
+                tup15.sort()
+                if nter == '2.16.-':
+                    npart = []
+                    for bi in part_tab:
+                        np = []
+                        for tupla in bi:
+                            a = tupla[0]-1 
+                            np.append((a,tupla[1]))
+                        npart.append(np)
+                    tuplas = CommonUtils.subtuplas(totales,tup15 ,npart,r[8])
+                
+                else:
+                    r[8]['tuplas'] = r[1]
+                    tuplas = CommonUtils.subtuplas(totales,tup15 ,part_tab,r[8])
+                
                 ntuplas = []
                 for tupl in r[1]:
                     tfil = tupl[0]
