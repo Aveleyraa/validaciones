@@ -5,6 +5,7 @@ Created on Wed Nov  3 11:07:44 2021
 @author: AARON.RAMIREZ
 """
 
+from ast import Try
 from services.catalogos import validar_catalogo
 from utility.common_utils import CommonUtils, x_valida,final_tabla,frame
 
@@ -106,26 +107,30 @@ def procesarcoor(hopan, hoja):  # funcion principal!!
                         # if lista ==tuplas[-1] and len(totales['subtotal']) > 0 and lista[-1] != 'a':
                         #     print('entro aqui 2')
                         #     hay = validarTS(i,lista,freal,fin[c]+pregunta,hoja,ldeletras)
-
-                        if lista[-1] == "a":
-                            lista.remove("a")
-                            print("entro aqui 3")
-                            hay = CommonUtils.validarTS(
-                                i, lista, freal, fin[c] + pregunta, hoja, ldeletras
-                            )
-                        else:
-                            print("entro aqui 4")
-                            hay = CommonUtils.variables(
-                                i,
-                                lista,
-                                freal,
-                                fin[c] + pregunta,
-                                hoja,
-                                part_tab,
-                                ldeletras,
-                                "no",
-                            )
+                        try:
+                            if lista[-1] == "a":
+                                lista.remove("a")
+                                print("entro aqui 3")
+                                hay = CommonUtils.validarTS(
+                                    i, lista, freal, fin[c] + pregunta, hoja, ldeletras
+                                )
+                            else:
+                                print("entro aqui 4")
+                                hay = CommonUtils.variables(
+                                    i,
+                                    lista,
+                                    freal,
+                                    fin[c] + pregunta,
+                                    hoja,
+                                    part_tab,
+                                    ldeletras,
+                                    "no",
+                                )
                             hay = hay[0]
+                        except IndexError:
+                            print("error de indexacion")
+                            
+
                         letras_validadas.append(hay)
                         extraer_letras.append(ldeletras[:6])
                         c1 += 1

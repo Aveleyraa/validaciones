@@ -929,8 +929,14 @@ class CommonUtils:
         a = cor[0]
         b = cor[1]
         mdf = hopan.iloc[a:b]
+        columnas = mdf.columns.tolist() #se agregan lineas para leer subtotales que no se podian mapear por celdas combianadas
+        subtotales = []
+        for i in columnas:
+            resultado = mdf[i].isin(['Subtotal']) 
+            subtotales.append(resultado)
+        df = pd.DataFrame(data=subtotales)   
         total = "Total" in mdf.values
-        subtotal = "Subotal" in mdf.values
+        subtotal = True in df.values
 
         if total == True or subtotal == True:
             t = CommonUtils.totorsubtot(mdf, "Total")
@@ -2168,19 +2174,31 @@ class CommonUtils:
             to = total[0][1]
             extras = [tupla for tupla in tuplas if tupla[1] in range(to, ncol[0])]
             if len(extras) > 0:
-                os = []
+                os_1 = []
                 conta = 1
                 # print('aaaaaaaa', coltu, extras)
                 for tupla in extras[1:]:
                     ti = [tupla]
                     for lista in coltu:
-                        ti.append(lista[conta])
+                        ti.append(lista[conta:len(lista):2]) # se agrega linea para que lea todos los valores de subtotales
                     conta += 1
                     ti.append(
                         "a"
                     )  # para subttales que no se llama así, el A es para identificarles, pero se borra antes de ingresar a la funcion de validacion
-                    os.append(ti)
-                for lista in os:
+                    os_1.append(ti)
+                def reemovNestings(l):
+                    for i in l:
+                        if type(i) == list:
+                            reemovNestings(i)
+                        else:
+                            os_2.append(i)    
+                os_2 = []              
+                reemovNestings(os_1)
+                longitud_sublist = len(os_2)
+                os_ = [os_2[:int(longitud_sublist/2)]]
+                os_.append(os_2[int(longitud_sublist/2):])
+                #print('esto es lo que causa probelas', os_)               
+                for lista in os_:
                     coltu.append(lista)
 
             tt = [(tuplas[0][0], total[0][1])]
@@ -3476,7 +3494,7 @@ class CommonUtils:
 
         #     hoja.conditional_formatting.add(colu,
         #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
-        return fcon1[0]
+        return [fcon1[0], alt1[0]]
 
     @staticmethod
     def validarTSD(fila, tuplas, freal, autosuma, hoja, letras, pregunta, codelitos):
