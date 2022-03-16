@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import string
+import ntpath
 from openpyxl.styles import Font
 from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import FormulaRule
@@ -2186,7 +2187,7 @@ class CommonUtils:
                         "a"
                     )  # para subttales que no se llama así, el A es para identificarles, pero se borra antes de ingresar a la funcion de validacion
                     os_1.append(ti)
-                def reemovNestings(l):
+                def reemovNestings(l): # se agreaga funcion auxiliar para generar una sola lista de salida
                     for i in l:
                         if type(i) == list:
                             reemovNestings(i)
@@ -2195,7 +2196,7 @@ class CommonUtils:
                 os_2 = []              
                 reemovNestings(os_1)
                 longitud_sublist = len(os_2)
-                os_ = [os_2[:int(longitud_sublist/2)]]
+                os_ = [os_2[:int(longitud_sublist/2)]] # se divide en dos listas dentro de la lista
                 os_.append(os_2[int(longitud_sublist/2):])
                 #print('esto es lo que causa probelas', os_)               
                 for lista in os_:
@@ -3494,7 +3495,7 @@ class CommonUtils:
 
         #     hoja.conditional_formatting.add(colu,
         #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
-        return [fcon1[0], alt1[0]]
+        return [fcon1[0], alt1[0]]  #Se agrega la vriable alt1[0] como salida 
 
     @staticmethod
     def validarTSD(fila, tuplas, freal, autosuma, hoja, letras, pregunta, codelitos):
@@ -4059,3 +4060,8 @@ class CommonUtils:
             hoja[i] = que[l]
             l += 1
         return
+
+    @staticmethod
+    def path_leaf(path):
+        head, tail = ntpath.split(path)
+        return tail or ntpath.basename(head)
