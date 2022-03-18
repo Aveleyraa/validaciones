@@ -2168,13 +2168,22 @@ class CommonUtils:
             to = total[0][1]
             extras = [tupla for tupla in tuplas if tupla[1] in range(to, ncol[0])]
             if len(extras) > 0:
+                len_ex = len(extras) - 1 #menos uno para ignorarl el total
                 os = []
                 conta = 1
                 # print('aaaaaaaa', coltu, extras)
                 for tupla in extras[1:]:
                     ti = [tupla]
                     for lista in coltu:
-                        ti.append(lista[conta])
+                        len_lista = len(lista) - 1 #para solo saber de sus desagregados
+                        if len_lista != len_ex:
+                            veces = len_lista / len_ex
+                            salto = len_lista / veces
+                            salto = int(salto)
+                            for tupla1 in lista[conta::salto]:
+                                ti.append(tupla1)
+                        else:
+                            ti.append(lista[conta])
                     conta += 1
                     ti.append(
                         "a"
@@ -2249,13 +2258,22 @@ class CommonUtils:
                 to = total[0][1]
                 extras = [tupla for tupla in tuplas if tupla[1] in range(to, col[0])]
                 if len(extras) > 0:
+                    len_ex = len(extras) - 1 #menos uno para ignorarl el total
                     os = []
                     conta = 1
                     # print('aaaaaaaa', coltu, extras)
                     for tupla in extras[1:]:
                         ti = [tupla]
                         for lista in coltu:
-                            ti.append(lista[conta])
+                            len_lista = len(lista) - 1 #para solo saber de sus desagregados
+                            if len_lista != len_ex:
+                                veces = len_lista / len_ex
+                                salto = len_lista / veces
+                                salto = int(salto)
+                                for tupla1 in lista[conta::salto]:
+                                    ti.append(tupla1)
+                            else:
+                                ti.append(lista[conta])
                         conta += 1
                         ti.append(
                             "a"
