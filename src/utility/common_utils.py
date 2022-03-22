@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import string
 from openpyxl.styles import Font, PatternFill, Alignment
+import ntpath
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
@@ -928,8 +929,14 @@ class CommonUtils:
         a = cor[0]
         b = cor[1]
         mdf = hopan.iloc[a:b]
+        columnas = mdf.columns.tolist() #se agregan lineas para leer subtotales que no se podian mapear por celdas combianadas
+        subtotales = []
+        for i in columnas:
+            resultado = mdf[i].isin(['Subtotal']) 
+            subtotales.append(resultado)
+        df = pd.DataFrame(data=subtotales)   
         total = "Total" in mdf.values
-        subtotal = "Subotal" in mdf.values
+        subtotal = True in df.values
 
         if total == True or subtotal == True:
             t = CommonUtils.totorsubtot(mdf, "Total")
@@ -2168,8 +2175,10 @@ class CommonUtils:
             to = total[0][1]
             extras = [tupla for tupla in tuplas if tupla[1] in range(to, ncol[0])]
             if len(extras) > 0:
+
                 len_ex = len(extras) - 1 #menos uno para ignorarl el total
-                os = []
+                os_1 = []
+
                 conta = 1
                 # print('aaaaaaaa', coltu, extras)
                 for tupla in extras[1:]:
@@ -2184,12 +2193,25 @@ class CommonUtils:
                                 ti.append(tupla1)
                         else:
                             ti.append(lista[conta])
+
                     conta += 1
                     ti.append(
                         "a"
                     )  # para subttales que no se llama así, el A es para identificarles, pero se borra antes de ingresar a la funcion de validacion
-                    os.append(ti)
-                for lista in os:
+                    os_1.append(ti)
+                def reemovNestings(l): # se agreaga funcion auxiliar para generar una sola lista de salida
+                    for i in l:
+                        if type(i) == list:
+                            reemovNestings(i)
+                        else:
+                            os_2.append(i)    
+                os_2 = []              
+                reemovNestings(os_1)
+                longitud_sublist = len(os_2)
+                os_ = [os_2[:int(longitud_sublist/2)]] # se divide en dos listas dentro de la lista
+                os_.append(os_2[int(longitud_sublist/2):])
+                #print('esto es lo que causa probelas', os_)               
+                for lista in os_:
                     coltu.append(lista)
 
             tt = [(tuplas[0][0], total[0][1])]
@@ -3520,7 +3542,7 @@ class CommonUtils:
 
         #     hoja.conditional_formatting.add(colu,
         #                                     FormulaRule(formula=[condi1[0]+'="NA"'], stopIfTrue=True, fill=gris))
-        return fcon1[0]
+        return [fcon1[0], alt1[0]]  #Se agrega la vriable alt1[0] como salida 
 
     @staticmethod
     def validarTSD(fila, tuplas, freal, autosuma, hoja, letras, pregunta, codelitos):
@@ -4093,3 +4115,8 @@ class CommonUtils:
             hoja[i] = que[l]
             l += 1
         return
+
+    @staticmethod
+    def path_leaf(path):
+        head, tail = ntpath.split(path)
+        return tail or ntpath.basename(head)

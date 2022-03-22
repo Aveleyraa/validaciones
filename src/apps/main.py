@@ -2,8 +2,7 @@ import pandas as pd
 import openpyxl as op
 from tkinter import filedialog, messagebox
 import tkinter as tk
-import sys
-import os 
+from utility.common_utils import CommonUtils
 from services.principal_doc import procesarcoor, frame
 
 root= tk.Tk()
@@ -31,8 +30,6 @@ def main():
 
     """
     import_file_path = filedialog.askopenfilename()
-    modulo = 2
-
     libro = import_file_path
 
     book = op.load_workbook(libro)
@@ -61,7 +58,8 @@ def main():
     frame.crear_df()
     frame.guardar()
     
-    nombre_archivo_salvado = "0{}_CNSIPEF_2022_M{}_validado.xlsx".format(modulo,modulo)
+    nombre_archivo_salvado = CommonUtils.path_leaf(import_file_path)
+    nombre_archivo_salvado = 'Archivo_validado_' + nombre_archivo_salvado 
     directory = filedialog.askdirectory()
     book.save(directory + '/' + nombre_archivo_salvado)
     messagebox.showinfo('Aviso', 'Se ha terminado la validación del censo!')
@@ -71,7 +69,7 @@ def main():
 #    main()
 
 
-browseButton_Excel = tk.Button(text='Cargar archivo...', command=main, bg='green', fg='white', font=('helvetica', 12, 'bold'))
+browseButton_Excel = tk.Button(text='Cargar archivo...', command=main, bg='blue1', fg='white', font=('helvetica', 12, 'bold'))
 canvas1.create_window(400, 180, window=browseButton_Excel)
  
 
