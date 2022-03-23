@@ -136,10 +136,7 @@ class App(customtkinter.CTk):
 
             shi = book[pagina]
             shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
-            procesarcoor(shet, shi)
-
-        frame.crear_df()
-        frame.guardar()
+            procesarcoor(shet, shi, pagina)
 
         nombre_archivo_salvado = CommonUtils.path_leaf(import_file_path)
         nombre_archivo_salvado = 'Archivo_validado_' + nombre_archivo_salvado

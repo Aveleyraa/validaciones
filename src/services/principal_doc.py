@@ -217,7 +217,7 @@ def procesarcoor(hopan, hoja, seccion):  # funcion principal!!
                             hay = CommonUtils.variables(
                                 i, lista, freal, 0, hoja, part_tab, ldeletras, "no"
                             )
-                            hay = hay[0]
+                        hay = hay[0]
                         letras_validadas.append(hay)
                         extraer_letras.append(ldeletras[:6])
                         c += 1
