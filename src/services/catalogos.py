@@ -10,10 +10,10 @@ import pandas as pd
 import string
 import os
 
-a=os.path.split(os.getcwd())[0]
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 #catalogos = pd.read_csv("{}/mock/base_catalogos.csv".format(a))
-catalogos = pd.read_csv(r"D:\OneDrive - INEGI\Documents\proyecto_validaciones\base_catalogos.csv")
+catalogos = pd.read_csv( PATH + "/mock/base_catalogos.csv")
 
 def validar_catalogo(pregunta,dic,hoja):
     """
