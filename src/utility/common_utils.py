@@ -1,21 +1,20 @@
 import numpy as np
 import pandas as pd
 import string
+from openpyxl.styles import Font, PatternFill, Alignment
 import ntpath
-from openpyxl.styles import Font
-from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from collections import Counter
 from utility.extractor import Extractor, Datos
 
-frame = Datos('preguntasytotales')
+frame = Datos('preguntas_relacionadas')
 
 x_valida = Extractor()
 
 final_tabla = Extractor()
 
-redFill = PatternFill(start_color="EE1111", end_color="EE1111", fill_type="solid")
+redFill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
 
 gris = PatternFill(fill_type="mediumGray", patternType="mediumGray")
 
@@ -1826,7 +1825,7 @@ class CommonUtils:
             "=CAMBIAR("
             + "AH"
             + str(fila_suma + 2)
-            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, la fila se debe dejar en blanco",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
+            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, la fila se debe dejar en blanco o llenarla con NA según sea la instrucción",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
             "=CAMBIAR("
             + "Ak"
             + str(fila_suma + 2)
@@ -1885,7 +1884,8 @@ class CommonUtils:
                 agrega.append(co)
             preg.append(letcol)
         con = 0
-        frame.agregar_valor_acolumna(agrega,'totales')
+        agrega = ','.join(agrega)
+        frame.agregar_valor_acolumna(agrega,'coordenada')
         
         for p in preg:
             if len(preg) == 0:
@@ -2175,13 +2175,25 @@ class CommonUtils:
             to = total[0][1]
             extras = [tupla for tupla in tuplas if tupla[1] in range(to, ncol[0])]
             if len(extras) > 0:
+
+                len_ex = len(extras) - 1 #menos uno para ignorarl el total
                 os_1 = []
+
                 conta = 1
                 # print('aaaaaaaa', coltu, extras)
                 for tupla in extras[1:]:
                     ti = [tupla]
                     for lista in coltu:
-                        ti.append(lista[conta:len(lista):2]) # se agrega linea para que lea todos los valores de subtotales
+                        len_lista = len(lista) - 1 #para solo saber de sus desagregados
+                        if len_lista != len_ex:
+                            veces = len_lista / len_ex
+                            salto = len_lista / veces
+                            salto = int(salto)
+                            for tupla1 in lista[conta::salto]:
+                                ti.append(tupla1)
+                        else:
+                            ti.append(lista[conta])
+
                     conta += 1
                     ti.append(
                         "a"
@@ -2268,13 +2280,22 @@ class CommonUtils:
                 to = total[0][1]
                 extras = [tupla for tupla in tuplas if tupla[1] in range(to, col[0])]
                 if len(extras) > 0:
+                    len_ex = len(extras) - 1 #menos uno para ignorarl el total
                     os = []
                     conta = 1
                     # print('aaaaaaaa', coltu, extras)
                     for tupla in extras[1:]:
                         ti = [tupla]
                         for lista in coltu:
-                            ti.append(lista[conta])
+                            len_lista = len(lista) - 1 #para solo saber de sus desagregados
+                            if len_lista != len_ex:
+                                veces = len_lista / len_ex
+                                salto = len_lista / veces
+                                salto = int(salto)
+                                for tupla1 in lista[conta::salto]:
+                                    ti.append(tupla1)
+                            else:
+                                ti.append(lista[conta])
                         conta += 1
                         ti.append(
                             "a"
@@ -2472,6 +2493,10 @@ class CommonUtils:
         )
         codelitos1 = CommonUtils.listalistas(codelitos)
         abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
+        if len(tuplas) == 1:
+            print('seguro es un subtotal unico')
+            r = [abc1[tuplas[0][1]]+str(freal+2)]
+            return r
         ntuplas = []  # hacer ajuste de las tuplas de otras filas
         copia_tuplas = []
         for tupla in tuplas:
@@ -2582,7 +2607,13 @@ class CommonUtils:
                 + totl
                 + '="NS",'
                 + desa
-                + "=0)),IF(AND("
+                + "=0),AND("
+                + totl
+                +">0,SUM("
+                + desag
+                + ")=0,COUNTIF("
+                + desag
+                + ',"NS")>0)),IF(AND('
                 + totl
                 + '="NA",'
                 + desa
@@ -2780,7 +2811,8 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -2817,7 +2849,8 @@ class CommonUtils:
             )
             que.append(a)
             c += 1
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         try:
             CommonUtils.escribirgeneral(donde, que, hoja)
         except:
@@ -3017,7 +3050,8 @@ class CommonUtils:
             + CommonUtils.lw(L, inicio, 164)
             + "))"
         ]
-        frame.agregar_valor_acolumna(donde,'totales')
+        dn = ','.join(donde)
+        frame.agregar_valor_acolumna(dn,'coordenada')
         CommonUtils.escribirgeneral(donde, que, hoja)
 
         return
@@ -3078,6 +3112,10 @@ class CommonUtils:
         "part tab es si la tabla está en partes, men es si o no, y es para el mensaje de errores debido al proceso extrerno si hay totales o subtotales en las tablas"
         print("argumentos de entrada funcion variable", fila, tuplas, freal, autosuma)
         abc1 = list(string.ascii_uppercase) + ["AA", "AB", "AC", "AD"]
+        if len(tuplas) == 1:
+            print('seguro es un subtotal unico')
+            r = [[abc1[tuplas[0][1]]+str(freal+2)]]
+            return r
         columnas = []
         letcol = []
         tuplas.sort()
@@ -3334,7 +3372,14 @@ class CommonUtils:
             if autosuma == 0 and iterar != 164:
                 CommonUtils.menerror(freal + 2, freal + 2, hoja)
         if autosuma == 0:
-            frame.agregar_valor_acolumna(chek,'totales')
+            if type(chek[0]) == list:
+                nchek = []
+                for c in chek:
+                    nchek += c
+                chek = nchek
+            dn = ','.join(chek)
+            
+            frame.agregar_valor_acolumna(dn,'coordenada')
 
         return [fcon1[0], alt1[0]]
 
@@ -3486,7 +3531,9 @@ class CommonUtils:
                 )
                 # autosumanormal([letra], freal, autosuma, hoja)
                 c += 1
-
+        if autosuma == 0:
+            dn = ','.join(fcon1[0])
+            frame.agregar_valor_acolumna(dn,'coordenada')
         # condi1 =[]
         # for l in letcol:
         #     condi1.append(lw(l,freal+(tupla[0]-fila),2))
@@ -3738,7 +3785,13 @@ class CommonUtils:
                 + totl
                 + '="NS",'
                 + desa
-                + "=0)),IF(AND("
+                + "=0),AND("
+                + totl
+                + '>0,SUM('
+                + desag
+                + ')=0,COUNTIF('
+                + desag
+                + ',"NS")>0)),IF(AND('
                 + totl
                 + '="NA",'
                 + desa
@@ -3815,7 +3868,7 @@ class CommonUtils:
             "=CAMBIAR("
             + "AH"
             + str(fila_suma + 2)
-            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, la fila se debe dejar en blanco",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
+            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, la fila se debe dejar en blanco o llenarla con NA según sea la instrucción",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
             "=CAMBIAR("
             + "Ak"
             + str(fila_suma + 2)
@@ -3854,7 +3907,7 @@ class CommonUtils:
             "=CAMBIAR("
             + "AH"
             + str(fila_suma + 2)
-            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, los desagregados deben quedar en blanco",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
+            + ',0,"",1,"El total no puede ser cero si se registró un NS o un valor mayor que cero en los desagregados",2,"El total no puede ser NS si registraste algún valor o todos los desagregados son cero",3,"Error en total donde se indica cero y también donde se indica con NS",4,"Cuando el total es NA, los desagregados deben quedar en blanco o llenarla con NA según sea la instrucción",5,"Hay error donde el total se indica como cero y también en total con NA",6,"Error donde el total es NS y también donde el total es NA",7,"En los totales que se indica cero, NS y NA ")',
             "=CAMBIAR("
             + "Ak"
             + str(fila_suma + 2)
@@ -4054,9 +4107,11 @@ class CommonUtils:
         "dodne son las letras con el numero de fila y que es lo que se va a escribir, ambos listas"
         l = 0
         tipo = Font(name="Arial", size=10, color="EE1111", bold=True)
+        alin = Alignment(wrap_text=False)
         for i in donde:
             a1 = hoja[i]
             a1.font = tipo
+            a1.alignment = alin
             hoja[i] = que[l]
             l += 1
         return

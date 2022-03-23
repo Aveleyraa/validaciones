@@ -12,6 +12,7 @@ import tkinter.messagebox
 import customtkinter
 import sys
 
+
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -42,8 +43,6 @@ class App(customtkinter.CTk):
 
         self.frame_right = customtkinter.CTkFrame(master=self)
         self.frame_right.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
-
-
 
         # ============ frame_right ============
 
@@ -138,7 +137,10 @@ class App(customtkinter.CTk):
             shi = book[pagina]
             shet = pd.read_excel(libro, sheet_name=pagina, engine="openpyxl")
             procesarcoor(shet, shi)
-    
+
+        frame.crear_df()
+        frame.guardar()
+
         nombre_archivo_salvado = CommonUtils.path_leaf(import_file_path)
         nombre_archivo_salvado = 'Archivo_validado_' + nombre_archivo_salvado
         data = [('xlsx', '*.xlsx')] 
